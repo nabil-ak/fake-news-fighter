@@ -52,8 +52,8 @@ export class NewsFeed extends Scene {
 
     create() {
         // Create background
-        this.add.rectangle(0, 0, 1440, 900, 0xf5f7fa).setOrigin(0);
-
+        this.add.rectangle(0, 0, 1280, 720, 0xcfd8dc).setOrigin(0);
+        
         // Create UI elements
         this.createScorePanel();
         this.createToolPanel();
@@ -81,10 +81,10 @@ export class NewsFeed extends Scene {
 
         this.selectedPostContainer = null;
         this.selectedPost = null;
-        this.feedbackText = this.add.text(720, 780, '', {
+        this.feedbackText = this.add.text(300, 575, '', {
             fontSize: '28px',
             color: '#1976d2',
-            fontFamily: 'Arial',
+            fontFamily: 'Roboto',
             fontStyle: 'bold',
             align: 'center',
             padding: { left: 16, right: 16, top: 8, bottom: 8 },
@@ -97,29 +97,29 @@ export class NewsFeed extends Scene {
 
     private createScorePanel() {
         // Group score/time in a card (no viral score)
-        const panel = this.add.rectangle(160, 80, 260, 80, 0xffffff, 1)
+        /*const panel = this.add.rectangle(160, 80, 260, 80, 0xffffff, 1)
             .setOrigin(0.5)
-            .setStrokeStyle(2, 0xe0e0e0);
-        this.scoreText = this.add.text(80, 50, 'Score: 0', {
+            .setStrokeStyle(2, 0xe0e0e0);*/
+        this.scoreText = this.add.text(1110, 30, 'Score: 0', {
             fontSize: '28px',
             color: '#1976d2',
             fontStyle: 'bold',
-            fontFamily: 'Arial'
+            fontFamily: 'Roboto'
         });
-        this.timeText = this.add.text(80, 90, 'Time: 20:00', {
+        this.timeText = this.add.text(1110, 70, 'Time: 20:00', {
             fontSize: '22px',
             color: '#222',
-            fontFamily: 'Arial'
+            fontFamily: 'Roboto'
         });
     }
 
     private createToolPanel() {
-        const toolPanel = this.add.container(720, 700);
+        const toolPanel = this.add.container(150, 50);
         // Responsive Check Image button
-        const checkImage = this.add.text(-80, 0, '🔍 Img', {
+        const checkImage = this.add.text(-40, 0, '🔍 Img', {
             fontSize: '28px',
             color: '#1976d2',
-            fontFamily: 'Arial',
+            fontFamily: 'Roboto',
             fontStyle: 'bold',
             backgroundColor: '#e3eafc',
             padding: { left: 16, right: 16, top: 8, bottom: 8 },
@@ -134,16 +134,18 @@ export class NewsFeed extends Scene {
                 checkImage.setStyle({ backgroundColor: '#e3eafc' });
             })
             .on('pointerover', () => {
-                checkImage.setStyle({ backgroundColor: '#bbdefb', scale: 1.1 });
+                checkImage.setStyle({ backgroundColor: '#bbdefb'});
+                checkImage.scale = 1.15;
             })
             .on('pointerout', () => {
-                checkImage.setStyle({ backgroundColor: '#e3eafc', scale: 1 });
+                checkImage.setStyle({ backgroundColor: '#e3eafc'});
+                checkImage.scale = 1;
             });
         // Responsive Check Source button
-        const checkSource = this.add.text(80, 0, '🔗 Src', {
+        const checkSource = this.add.text(200, 0, '🔗 Src', {
             fontSize: '28px',
             color: '#1976d2',
-            fontFamily: 'Arial',
+            fontFamily: 'Roboto',
             fontStyle: 'bold',
             backgroundColor: '#e3eafc',
             padding: { left: 16, right: 16, top: 8, bottom: 8 },
@@ -158,34 +160,36 @@ export class NewsFeed extends Scene {
                 checkSource.setStyle({ backgroundColor: '#e3eafc' });
             })
             .on('pointerover', () => {
-                checkSource.setStyle({ backgroundColor: '#bbdefb', scale: 1.1 });
+                checkSource.setStyle({ backgroundColor: '#bbdefb'});
+                checkSource.scale = 1.15;
             })
             .on('pointerout', () => {
-                checkSource.setStyle({ backgroundColor: '#e3eafc', scale: 1 });
+                checkSource.setStyle({ backgroundColor: '#e3eafc'});
+                checkSource.scale = 1;
             });
         toolPanel.add([checkImage, checkSource]);
     }
 
     private createDropZones() {
         // Fake News drop zone (left)
-        this.fakeDropZone = this.add.zone(400, 820, 500, 120).setRectangleDropZone(500, 120);
-        this.fakeDropZoneLabel = this.add.text(400, 820, '🚫 Mark as Fake', {
-            fontSize: '40px',
+        this.fakeDropZone = this.add.zone(320, 640, 450, 120).setRectangleDropZone(500, 120);
+        this.fakeDropZoneLabel = this.add.text(320, 640, '🚫 Mark as Fake', {
+            fontSize: '24px',
             color: '#fff',
             backgroundColor: '#d32f2f',
-            fontFamily: 'Arial',
+            fontFamily: 'Roboto',
             fontStyle: 'bold',
             padding: { left: 40, right: 40, top: 24, bottom: 24 },
         }).setOrigin(0.5);
         this.fakeDropZone.setData('type', 'fake');
 
         // Real News drop zone (right)
-        this.realDropZone = this.add.zone(1040, 820, 500, 120).setRectangleDropZone(500, 120);
-        this.realDropZoneLabel = this.add.text(1040, 820, '✅ Mark as Real', {
-            fontSize: '40px',
+        this.realDropZone = this.add.zone(750, 640, 450, 120).setRectangleDropZone(500, 120);
+        this.realDropZoneLabel = this.add.text(750, 640, '✅ Mark as Real', {
+            fontSize: '24px',
             color: '#fff',
             backgroundColor: '#388e3c',
-            fontFamily: 'Arial',
+            fontFamily: 'Roboto',
             fontStyle: 'bold',
             padding: { left: 40, right: 40, top: 24, bottom: 24 },
         }).setOrigin(0.5);
@@ -193,7 +197,7 @@ export class NewsFeed extends Scene {
     }
 
     private createLegendPanel() {
-        const legendPanel = this.add.container(1240, 450);
+        const legendPanel = this.add.container(1065, 350);
         const bg = this.add.rectangle(0, 0, 320, 390, 0xffffff)
             .setOrigin(0.5)
             .setStrokeStyle(2, 0x1976d2)
@@ -201,19 +205,19 @@ export class NewsFeed extends Scene {
         // Chat bubbles / tips
         const chatBubbles = [
             this.add.text(-130, -140, '💬 Hey, need a tip? Use the tools below to research!', {
-                fontSize: '18px', color: '#1976d2', fontFamily: 'Arial', wordWrap: { width: 240 }
+                fontSize: '18px', color: '#1976d2', fontFamily: 'Arial', wordWrap: { width: 270 }
             }),
             this.add.text(-130, -70, '😏 Remember: If it sounds too wild, it probably is.', {
-                fontSize: '18px', color: '#222', fontFamily: 'Arial', wordWrap: { width: 240 }
+                fontSize: '18px', color: '#222', fontFamily: 'Arial', wordWrap: { width: 270 }
             }),
             this.add.text(-130, 0, '😂 Some posts are just memes in disguise.', {
-                fontSize: '18px', color: '#888', fontFamily: 'Arial', wordWrap: { width: 240 }
+                fontSize: '18px', color: '#888', fontFamily: 'Arial', wordWrap: { width: 270 }
             }),
             this.add.text(-130, 70, '🧐 Double-check the source, always!', {
-                fontSize: '18px', color: '#1976d2', fontFamily: 'Arial', wordWrap: { width: 240 }
+                fontSize: '18px', color: '#1976d2', fontFamily: 'Arial', wordWrap: { width: 270 }
             }),
             this.add.text(-130, 140, '🔥 Don\'t let fake news go viral!', {
-                fontSize: '18px', color: '#d32f2f', fontFamily: 'Arial', wordWrap: { width: 240 }
+                fontSize: '18px', color: '#d32f2f', fontFamily: 'Arial', wordWrap: { width: 270 }
             })
         ];
         legendPanel.add([bg, ...chatBubbles]);
@@ -258,10 +262,10 @@ export class NewsFeed extends Scene {
 
     private createPostElement(post: NewsPost): Phaser.GameObjects.Container {
         // Smaller post card
-        const cardWidth = 700;
+        const cardWidth = 800;
         const cardHeight = 170;
-        const container = this.add.container(720, this.feedY);
-        this.feedY += cardHeight + 30; // Stack posts vertically with margin
+        const container = this.add.container(450, this.feedY);
+        this.feedY += cardHeight + 25; // Stack posts vertically with margin
         container.setSize(cardWidth, cardHeight);
         container.setInteractive();
         this.input.setDraggable(container);

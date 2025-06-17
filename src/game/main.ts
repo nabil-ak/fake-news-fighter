@@ -1,4 +1,5 @@
 import { MainMenu } from './scenes/MainMenu';
+import { Mission } from './scenes/MissionLevel1';
 import { NewsFeed } from './scenes/NewsFeed';
 import { GameOver } from './scenes/GameOver';
 import { AUTO, Game, Types } from 'phaser';
@@ -7,8 +8,8 @@ import { AUTO, Game, Types } from 'phaser';
 // https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
 const config: Types.Core.GameConfig = {
     type: AUTO,
-    width: 1440,
-    height: 900,
+    width: 1280,
+    height: 720,
     parent: 'game-container',
     backgroundColor: '#f5f7fa',
     physics: {
@@ -18,15 +19,52 @@ const config: Types.Core.GameConfig = {
             debug: false
         }
     },
+    /*dom: {
+        createContainer: true
+    },
+    scale:{
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },*/
+
     scene: [
         MainMenu,
+        Mission,
         NewsFeed,
         GameOver
-    ]
+    ],
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
 };
 
 const StartGame = (parent: string) => {
-    return new Game({ ...config, parent });
+    const game = new Game({ ...config, parent });
+    /*const onChangeScreen = () => {
+        game.scale.resize(window.innerWidth, window.innerHeight);
+        if (game.scene.scenes.length > 0) {
+            let currentScene = game.scene.scenes[0];
+
+            if (currentScene instanceof MainMenu) {
+                currentScene.resize();
+            } else if (currentScene instanceof Mission) {
+                currentScene.resize();
+            } else if (currentScene instanceof NewsFeed) {
+                currentScene.resize();
+            } else if (currentScene instanceof GameOver) {
+                currentScene.resize();
+            }
+        }
+    }
+    const _orientation = screen.orientation || (screen as any).mozOrientation || (screen as any).msOrientation;
+    _orientation.addEventListener('change', () => {
+        onChangeScreen();
+    });
+    window.addEventListener('resize', () => {
+    onChangeScreen();
+    });*/
+    return game;
 }
 
 export default StartGame;

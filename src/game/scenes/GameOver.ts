@@ -14,22 +14,22 @@ export class GameOver extends Scene {
 
     create() {
         // Add game over text
-        const gameOverText = this.add.text(512, 200, 'Game Over', {
-            fontFamily: 'Arial',
+        const gameOverText = this.add.text(640, 200, 'Game Over', {
+            fontFamily: 'Roboto',
             fontSize: '64px',
-            color: '#ffffff'
+            color: '#000000'
         }).setOrigin(0.5);
 
         // Add final score
-        const scoreText = this.add.text(512, 300, `Final Score: ${this.score}`, {
-            fontFamily: 'Arial',
+        const scoreText = this.add.text(640, 280, `Final Score: ${this.score}`, {
+            fontFamily: 'Roboto',
             fontSize: '32px',
-            color: '#ffffff'
+            color: '#000000'
         }).setOrigin(0.5);
 
         // Add restart button
-        const restartButton = this.add.text(512, 400, 'Play Again', {
-            fontFamily: 'Arial',
+        const restartButton = this.add.text(640, 400, 'Play Again', {
+            fontFamily: 'Roboto',
             fontSize: '32px',
             color: '#ffffff',
             backgroundColor: '#000000',
@@ -53,8 +53,8 @@ export class GameOver extends Scene {
         });
 
         // Add main menu button
-        const menuButton = this.add.text(512, 500, 'Main Menu', {
-            fontFamily: 'Arial',
+        const menuButton = this.add.text(640, 500, 'Main Menu', {
+            fontFamily: 'Roboto',
             fontSize: '32px',
             color: '#ffffff',
             backgroundColor: '#000000',
