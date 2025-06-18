@@ -1,14 +1,19 @@
 import { Scene } from 'phaser';
 
-export class Mission extends Scene {
+export class LevelRequirement extends Scene {
     constructor() {
-        super({ key: 'Mission' });
+        super({ key: 'LevelRequirement' });
     }
+
+    preload(){
+        this.load.image('nonameButton2', 'assets/nonameButton2.png');
+    }
+
     create() {
         // Add background
         this.add.rectangle(0, 0, 1280, 720, 0xcfd8dc).setOrigin(0);
 
-        // Card panel for content of mission
+        // Card panel for the level requirement
         this.add.rectangle(775, 280, 650, 400, 0xffffff, 1)
             .setOrigin(0.5)
             .setStrokeStyle(2, 0xe0e0e0);
@@ -29,30 +34,26 @@ export class Mission extends Scene {
         }).setOrigin(0.5);
 
         // Add start button
-        const playButton = this.add.text(775, 550, 'Ok! Let\'s start', {
+        const buttonBg = this.add.image(775, 550, 'nonameButton2');
+        
+        const buttonContent = this.add.text(775, 550, 'Ok! Let\'s start', {
             fontFamily: 'Roboto',
-            fontSize: '32px',
-            color: '#fff',
-            backgroundColor: '#1976d2',
-            padding: {
-                left: 40,
-                right: 40,
-                top: 16,
-                bottom: 16
-            },
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
+            fontSize: '38px',
+            color: '#ffffff',
+        }).setOrigin(0.5);
+
+        buttonBg.setDisplaySize(286,91)
+        .setOrigin(0.5).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
             this.scene.start('NewsFeed');
         })
         .on('pointerover', () => {
-            playButton.setStyle({ backgroundColor: '#115293'});
-            playButton.scale = 1.15;
+            buttonBg.setScale(0.45);
+            buttonContent.scale = 1.15;
         })
         .on('pointerout', () => {
-            playButton.setStyle({ backgroundColor: '#1976d2'});
-            playButton.scale = 1;
+            buttonBg.setScale(0.375);
+            buttonContent.scale = 1;
         });
 
     }
