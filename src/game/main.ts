@@ -1,6 +1,7 @@
 import { MainMenu } from './scenes/MainMenu';
-import { Mission } from './scenes/MissionLevel1';
+import { LevelRequirement } from './scenes/LevelRequirement';
 import { NewsFeed } from './scenes/NewsFeed';
+import { LevelCompleteScene } from './scenes/LevelCompleteScene';
 import { GameOver } from './scenes/GameOver';
 import { AUTO, Game, Types } from 'phaser';
 
@@ -29,7 +30,8 @@ const config: Types.Core.GameConfig = {
 
     scene: [
         MainMenu,
-        Mission,
+        LevelRequirement,
+        LevelCompleteScene,
         NewsFeed,
         GameOver
     ],
