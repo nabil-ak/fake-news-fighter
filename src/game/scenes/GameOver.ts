@@ -1,5 +1,4 @@
 import { Scene } from 'phaser';
-import { EventBus } from '../EventBus';
 
 export class GameOver extends Scene {
     private score: number = 0;
@@ -8,73 +7,59 @@ export class GameOver extends Scene {
         super({ key: 'GameOver' });
     }
 
+    preload() {
+        this.load.image('bgEndGame', 'assets/bgEndGame.jpg');
+        this.load.image('playAgainButton', 'assets/playAgainButton.png');
+        this.load.image('homeButton', 'assets/homeButton.png');
+    }
+
     init(data: { score: number }) {
         this.score = data.score;
     }
 
     create() {
+        this.add.tileSprite(640, 360, 1280, 720, 'bgEndGame');
         // Add game over text
-        const gameOverText = this.add.text(512, 200, 'Game Over', {
-            fontFamily: 'Arial',
+        const gameOverText = this.add.text(640, 200, 'Game Over', {
+            fontFamily: 'Roboto',
             fontSize: '64px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
         // Add final score
-        const scoreText = this.add.text(512, 300, `Final Score: ${this.score}`, {
-            fontFamily: 'Arial',
-            fontSize: '32px',
+        const scoreText = this.add.text(640, 300, `Final Score: ${this.score}`, {
+            fontFamily: 'Roboto',
+            fontSize: '48px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
         // Add restart button
-        const restartButton = this.add.text(512, 400, 'Play Again', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ffffff',
-            backgroundColor: '#000000',
-            padding: {
-                left: 20,
-                right: 20,
-                top: 10,
-                bottom: 10
-            }
-        })
-        .setOrigin(0.5)
-        .setInteractive()
+        const restartButton = this.add.image(550, 420, 'playAgainButton')
+        .setDisplaySize(80,80).setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
             this.scene.start('NewsFeed');
         })
         .on('pointerover', () => {
-            restartButton.setStyle({ backgroundColor: '#333333' });
+            restartButton.setScale(0.45);
         })
         .on('pointerout', () => {
-            restartButton.setStyle({ backgroundColor: '#000000' });
+            restartButton.setScale(0.375);
         });
 
-        // Add main menu button
-        const menuButton = this.add.text(512, 500, 'Main Menu', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ffffff',
-            backgroundColor: '#000000',
-            padding: {
-                left: 20,
-                right: 20,
-                top: 10,
-                bottom: 10
-            }
-        })
-        .setOrigin(0.5)
-        .setInteractive()
+        // Add home button
+        const homeButton = this.add.image(730, 420, 'homeButton')
+        .setDisplaySize(80,80).setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
             this.scene.start('MainMenu');
         })
         .on('pointerover', () => {
-            menuButton.setStyle({ backgroundColor: '#333333' });
+            homeButton.setScale(0.45);
         })
         .on('pointerout', () => {
-            menuButton.setStyle({ backgroundColor: '#000000' });
+            homeButton.setScale(0.375);
         });
+        
     }
 } 

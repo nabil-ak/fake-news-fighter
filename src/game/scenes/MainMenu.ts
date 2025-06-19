@@ -1,74 +1,81 @@
 import { Scene } from 'phaser';
+import { MusicManager } from './MusicManager';
 import { EventBus } from '../EventBus';
 
 export class MainMenu extends Scene {
+    private backgroundMusic?: Phaser.Sound.BaseSound;
+    private musicManager?: MusicManager;
+    
     constructor() {
         super({ key: 'MainMenu' });
     }
 
+    preload() {
+        this.load.image('bgStartGame2', 'assets/background/bgStartGame2.jpg');
+        this.load.image('logo', 'assets/logo.png');
+        this.load.audio('ByteKnightLightClouding2', 'assets/music/ByteKnightLightClouding2.mp3');
+        this.load.image('nonameButton', 'assets/button/nonameButton.png');
+        this.load.image('musicButton', 'assets/button/musicButton.png');
+        this.load.image('muteButton', 'assets/button/muteButton.png');
+    }
+
     create() {
         // Add background
-        this.add.rectangle(0, 0, 1440, 900, 0xf5f7fa).setOrigin(0);
-
-        // Card panel for menu
-        const panel = this.add.rectangle(720, 450, 700, 500, 0xffffff, 1)
-            .setOrigin(0.5)
-            .setStrokeStyle(2, 0xe0e0e0);
-
-        // Add title
-        const title = this.add.text(720, 270, 'Fake News Fighter', {
-            fontFamily: 'Arial',
-            fontSize: '56px',
-            color: '#222222',
-            fontStyle: 'bold',
-        }).setOrigin(0.5);
-
+        this.add.image(640, 360, 'bgStartGame2').setDisplaySize(1280, 720);
+        // Light transparent background overlay
+        this.add.rectangle(0, 0, 1280, 720, 0xffffff, 0.25).setOrigin(0);
+        
+        const logo = this.add.image(640, 245, 'logo');
+        logo.setDisplaySize(670,543);
+        
         // Add subtitle
-        const subtitle = this.add.text(720, 330, 'Become a Digital Detective', {
-            fontFamily: 'Arial',
+        const subtitle = this.add.text(640, 510, 'Stop the spread. Seek the truth.', {
+            fontFamily: 'Roboto',
             fontSize: '32px',
-            color: '#1976d2',
+            color: '#FFFF66',
             fontStyle: 'italic',
         }).setOrigin(0.5);
 
         // Add start button
-        const startButton = this.add.text(720, 400, 'Start Mission', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#fff',
-            backgroundColor: '#1976d2',
-            padding: {
-                left: 40,
-                right: 40,
-                top: 16,
-                bottom: 16
-            },
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
+        const buttonBg = this.add.image(640, 600, 'nonameButton');
+        
+        const buttonContent = this.add.text(640, 600, 'Start', {
+            fontFamily: 'Roboto',
+            fontSize: '38px',
+            color: '#ffffff',
+        }).setOrigin(0.5);
+
+        buttonBg.setDisplaySize(202,90)
+        .setOrigin(0.5).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.scene.start('NewsFeed');
+            this.scene.start('LevelRequirement');
         })
         .on('pointerover', () => {
-            startButton.setStyle({ backgroundColor: '#115293', scale: 1.05 });
+            buttonBg.setScale(0.45);
+            buttonContent.scale = 1.15;
         })
         .on('pointerout', () => {
-            startButton.setStyle({ backgroundColor: '#1976d2', scale: 1 });
+            buttonBg.setScale(0.375);
+            buttonContent.scale = 1;
         });
 
-        // Add instructions
-        const instructions = this.add.text(720, 530, 
-            'Your Mission:\n' +
-            '• Analyze news posts in the feed\n' +
-            '• Use fact-checking tools\n' +
-            '• Stop fake news from going viral\n' +
-            '• Complete your mission within 20 minutes!', {
-            fontFamily: 'Arial',
-            fontSize: '24px',
-            color: '#444',
-            align: 'center',
-            lineSpacing: 10,
-            wordWrap: { width: 600 }
-        }).setOrigin(0.5);
+        // Add music 
+        this.backgroundMusic = this.sound.add('ByteKnightLightClouding2', {
+            volume: 0.2,
+            loop: true
+        });
+
+        if (!this.sound.get('globalBgMusic')) {
+            (this.backgroundMusic as any).key = 'globalBgMusic';
+            this.backgroundMusic.play();
+        }
+
+        // Create music controller
+        this.musicManager = new MusicManager(this, this.backgroundMusic);
+        
+        // Create buttons
+        this.musicManager.createMusicButtons(1200, 50);
+
     }
+
 } 
