@@ -8,7 +8,7 @@ export class GameOver extends Scene {
     }
 
     preload() {
-        this.load.image('bg1', 'assets/bg1.jpg');
+        this.load.image('bgEndGame', 'assets/bgEndGame.jpg');
         this.load.image('playAgainButton', 'assets/playAgainButton.png');
         this.load.image('homeButton', 'assets/homeButton.png');
     }
@@ -18,7 +18,7 @@ export class GameOver extends Scene {
     }
 
     create() {
-        this.add.tileSprite(640, 360, 1280, 720, 'bg1');
+        this.add.tileSprite(640, 360, 1280, 720, 'bgEndGame');
         // Add game over text
         const gameOverText = this.add.text(640, 200, 'Game Over', {
             fontFamily: 'Roboto',

@@ -6,7 +6,7 @@ export class LevelRequirement extends Scene {
     }
 
     preload(){
-        this.load.image('nonameButton2', 'assets/nonameButton2.png');
+        this.load.image('nonameButton2', 'assets/button/nonameButton2.png');
     }
 
     create() {
