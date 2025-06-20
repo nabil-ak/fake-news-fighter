@@ -19,24 +19,24 @@ export class LevelRequirement extends Scene {
             .setStrokeStyle(2, 0xe0e0e0);
 
         // Add instructions
-        this.add.text(775, 280, 
+        this.add.text(500, 120, 
             'Level 1:\n' +
             '• Analyze news posts in the feed\n' +
             '• Use fact-checking tools\n' +
             '• Stop fake news from going viral\n' +
             '• Complete your mission within 20 minutes!', {
             fontFamily: 'Roboto',
-            fontSize: '28px',
+            fontSize: '26px',
             color: '#444',
             align: 'left',
             lineSpacing: 10,
-            wordWrap: { width: 600 }
-        }).setOrigin(0.5);
+            wordWrap: { width: 550 }
+        }).setOrigin(0);
 
         // Add start button
         const buttonBg = this.add.image(775, 550, 'nonameButton2');
         
-        const buttonContent = this.add.text(775, 550, 'Ok! Let\'s start', {
+        const buttonContent = this.add.text(775, 550, 'Los geht\'s!', {
             fontFamily: 'Roboto',
             fontSize: '38px',
             color: '#ffffff',

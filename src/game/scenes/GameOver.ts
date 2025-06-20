@@ -8,9 +8,10 @@ export class GameOver extends Scene {
     }
 
     preload() {
-        this.load.image('bgEndGame', 'assets/bgEndGame.jpg');
-        this.load.image('playAgainButton', 'assets/playAgainButton.png');
-        this.load.image('homeButton', 'assets/homeButton.png');
+        this.load.image('bgEndGame', 'assets/background/bgEndGame.jpg');
+        this.load.image('playAgainButton', 'assets/button/playAgainButton.png');
+        this.load.image('homeButton', 'assets/button/homeButton.png');
+        //this.load.image('nonameButton2', 'assets/button/nonameButton2.png');
     }
 
     init(data: { score: number }) {
@@ -18,33 +19,34 @@ export class GameOver extends Scene {
     }
 
     create() {
-        this.add.tileSprite(640, 360, 1280, 720, 'bgEndGame');
+        // Add background
+        this.add.image(640, 360, 'bgEndGame').setDisplaySize(1280, 720);
         // Add game over text
-        const gameOverText = this.add.text(640, 200, 'Game Over', {
+        const gameOverText = this.add.text(640, 270, 'Game Over', {
             fontFamily: 'Roboto',
             fontSize: '64px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
         // Add final score
-        const scoreText = this.add.text(640, 300, `Final Score: ${this.score}`, {
+        const scoreText = this.add.text(640, 330, `Final Score: ${this.score}`, {
             fontFamily: 'Roboto',
             fontSize: '48px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        // Add restart button
-        const restartButton = this.add.image(550, 420, 'playAgainButton')
+        // Add replay button
+        const replayButton = this.add.image(550, 420, 'playAgainButton')
         .setDisplaySize(80,80).setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.scene.start('NewsFeed');
+            this.scene.start('MainMenu');
         })
         .on('pointerover', () => {
-            restartButton.setScale(0.45);
+            replayButton.setScale(0.45);
         })
         .on('pointerout', () => {
-            restartButton.setScale(0.375);
+            replayButton.setScale(0.35);
         });
 
         // Add home button
@@ -58,7 +60,7 @@ export class GameOver extends Scene {
             homeButton.setScale(0.45);
         })
         .on('pointerout', () => {
-            homeButton.setScale(0.375);
+            homeButton.setScale(0.35);
         });
         
     }

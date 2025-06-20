@@ -37,25 +37,25 @@ export class MainMenu extends Scene {
         }).setOrigin(0.5);
 
         // Add start button
-        const buttonBg = this.add.image(640, 600, 'nonameButton');
+        const buttonBg = this.add.image(640, 595, 'nonameButton');
         
-        const buttonContent = this.add.text(640, 600, 'Start', {
+        const buttonContent = this.add.text(640, 595, 'Start', {
             fontFamily: 'Roboto',
             fontSize: '38px',
             color: '#ffffff',
         }).setOrigin(0.5);
 
-        buttonBg.setDisplaySize(202,90)
+        buttonBg.setDisplaySize(182,81)
         .setOrigin(0.5).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.scene.start('LevelRequirement');
+            this.scene.start('IntroScene');
         })
         .on('pointerover', () => {
             buttonBg.setScale(0.45);
-            buttonContent.scale = 1.15;
+            buttonContent.scale = 1.3;
         })
         .on('pointerout', () => {
-            buttonBg.setScale(0.375);
+            buttonBg.setScale(0.35);
             buttonContent.scale = 1;
         });
 

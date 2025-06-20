@@ -15,7 +15,7 @@ interface NewsPost {
 export class NewsFeed extends Scene {
     private posts: NewsPost[] = [];
     private score: number = 0;
-    private timeRemaining: number = 1200; // 20 minutes in seconds
+    private timeRemaining: number = 12; // 20 minutes in seconds
     private scoreText!: Phaser.GameObjects.Text;
     private timeText!: Phaser.GameObjects.Text;
     private selectedPostContainer: Phaser.GameObjects.Container | null = null;
