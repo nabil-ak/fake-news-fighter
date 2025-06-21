@@ -95,7 +95,7 @@ export class IntroScene extends Scene {
             .on('pointerout', () => {
                 noButton.setScale(0.35);
         });
-        
+        this.registry.set('currentLevel', 1);
     }
 
 }

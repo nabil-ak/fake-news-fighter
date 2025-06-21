@@ -40,7 +40,7 @@ export class GameOver extends Scene {
         .setDisplaySize(80,80).setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.scene.start('MainMenu');
+            this.scene.start('NewsFeed');
         })
         .on('pointerover', () => {
             replayButton.setScale(0.45);
