@@ -1,45 +1,31 @@
 import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 
-interface NewsPost {
-    id: number;
-    content: string;
-    image: string;
-    source: string;
-    date: string;
-    isFake: boolean;
-    viralScore: number;
-    username?: string;
-}
-
 export class NewsFeed extends Scene {
-    private posts: NewsPost[] = [];
     private score: number = 0;
-    private timeRemaining: number = 12; // 20 minutes in seconds
+    private timeRemaining: number = 12; // 5 minutes in seconds
     private scoreText!: Phaser.GameObjects.Text;
     private timeText!: Phaser.GameObjects.Text;
     private selectedPostContainer: Phaser.GameObjects.Container | null = null;
-    private selectedPost: NewsPost | null = null;
+    private selectedPost: any = null;
     private feedbackText!: Phaser.GameObjects.Text;
-    private realDropZone!: Phaser.GameObjects.Zone;
-    private fakeDropZone!: Phaser.GameObjects.Zone;
-    private realDropZoneLabel!: Phaser.GameObjects.Text;
-    private fakeDropZoneLabel!: Phaser.GameObjects.Text;
+    private linkDropZone!: Phaser.GameObjects.Zone;
+    private imageDropZone!: Phaser.GameObjects.Zone;
     private feedY: number = 200;
-    private avatars: string[] = [
-        '🕵️', '👩‍💻', '🧑', '👨‍🎤', '🤖', '🦸', '🧙', '👽', '🦹'
-    ];
+    private postsData: any;
+    private posts: any[];
+    private avatarKeys = Array.from({ length: 10 }, (_, i) => `profil${i + 1}`);
     private usernames: string[] = [
         'FactFinder', 'NewsNinja', 'MemeQueen', 'TrollHunter', 'InfoGuru', 'SatireSam', 'ViralVicky', 'TruthSeeker', 'ClickbaitCarl', 'DebunkDaisy'
     ];
-    private maxPostsOnScreen: number = 3;
+    private maxPostsOnScreen: number = 5;
 
     constructor() {
         super({ key: 'NewsFeed' });
     }
 
     preload() {
-        // Load UI assets
+        /* Load UI assets
         this.load.image('post-bg', 'assets/post-bg.png');
         this.load.image('tool-bg', 'assets/tool-bg.png');
         this.load.image('chat-bg', 'assets/chat-bg.png');
@@ -47,21 +33,62 @@ export class NewsFeed extends Scene {
         // Load tool icons
         this.load.image('check-image', 'assets/check-image.png');
         this.load.image('check-source', 'assets/check-source.png');
-        this.load.image('report', 'assets/report.png');
+        this.load.image('report', 'assets/report.png');*/
+
+        // Load json Data
+        this.load.json('postsData', 'src/data/posts.json');
+
+        //Load avatars
+        this.avatarKeys.forEach((key) => {
+        this.load.image(key, `public/assets/profil/${key}.png`);
+        });
+
+        // Preload complete event
+        this.load.on('complete', () => {
+            this.setupData();
+        });
     }
 
-    create() {
-        // Create background
-        this.add.rectangle(0, 0, 1280, 720, 0xcfd8dc).setOrigin(0);
+    setupData() {
+        // Get current level
+        const currentLevel = this.registry.get('currentLevel');
         
+        // Find postSetID
+        this.postsData = this.cache.json.get('postsData');
+        
+        // Get posts for current level
+        this.posts = this.postsData[currentLevel.toString()];
+
+        if (!this.posts) {
+            console.error(`No posts found for level ${currentLevel}`);
+            return;
+        }
+
+        // Dynamically load images after posts data is available
+        if (currentLevel === 3) {
+            // Load images dynamically
+            this.load.image('postImg1', this.posts[0].img);
+            this.load.image('postImg2', this.posts[1].img);
+            this.load.image('postImg5', this.posts[4].img);
+            this.load.image('postImg6', this.posts[5].img);
+            
+            // Start loading these images
+            this.load.start();
+        }
+    }    
+
+    create() {
+        // Get current level
+        const currentLevel = this.registry.get('currentLevel');
+        
+        // Add background
+        this.add.rectangle(0, 0, 1280, 720, 0xcfd8dc).setOrigin(0);
+
         // Create UI elements
         this.createScorePanel();
         this.createToolPanel();
         this.createDropZones();
         this.createLegendPanel();
-
-        // Initialize sample posts
-        this.initializePosts();
 
         // Start the game timer
         this.time.addEvent({
@@ -81,8 +108,8 @@ export class NewsFeed extends Scene {
 
         this.selectedPostContainer = null;
         this.selectedPost = null;
-        this.feedbackText = this.add.text(300, 575, '', {
-            fontSize: '28px',
+        this.feedbackText = this.add.text(300, 650, '', {
+            fontSize: '24px',
             color: '#1976d2',
             fontFamily: 'Roboto',
             fontStyle: 'bold',
@@ -92,21 +119,18 @@ export class NewsFeed extends Scene {
         this.feedY = 200;
 
         // Spawn the first news post immediately
-        this.spawnNewPost();
+        this.spawnNewPost(this.posts);
     }
 
     private createScorePanel() {
-        // Group score/time in a card (no viral score)
-        /*const panel = this.add.rectangle(160, 80, 260, 80, 0xffffff, 1)
-            .setOrigin(0.5)
-            .setStrokeStyle(2, 0xe0e0e0);*/
-        this.scoreText = this.add.text(1110, 30, 'Score: 0', {
+        // score and time
+        this.scoreText = this.add.text(1120, 30, 'Score: 0', {
             fontSize: '28px',
             color: '#1976d2',
             fontStyle: 'bold',
             fontFamily: 'Roboto'
         });
-        this.timeText = this.add.text(1110, 70, 'Time: 20:00', {
+        this.timeText = this.add.text(1120, 70, 'Time: 05:00', {
             fontSize: '22px',
             color: '#222',
             fontFamily: 'Roboto'
@@ -115,85 +139,85 @@ export class NewsFeed extends Scene {
 
     private createToolPanel() {
         const toolPanel = this.add.container(150, 50);
-        // Responsive Check Image button
-        const checkImage = this.add.text(-40, 0, '🔍 Img', {
-            fontSize: '28px',
-            color: '#1976d2',
+        // Link Checker button
+        const linkChecker = this.add.text(-35, 0, 'Link Checker', {
             fontFamily: 'Roboto',
-            fontStyle: 'bold',
-            backgroundColor: '#e3eafc',
+            fontSize: '24px',
+            color: '#1976d2',
+        }).setOrigin(0.5);
+        const linkCheckerBox = this.add.text(170, 95, 'Ziehe den Link hierher ...', {
+            fontSize: '20px',
+            color: '#888888',
+            fontFamily: 'Roboto',
+            fontStyle: 'italic',
+            backgroundColor: '#ffffff',
             padding: { left: 16, right: 16, top: 8, bottom: 8 },
         })
             .setOrigin(0.5)
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
-                checkImage.setStyle({ backgroundColor: '#bbdefb' });
-                this.useTool('check-image');
+                linkCheckerBox.setStyle({ backgroundColor: '#bbdefb' });
+                this.useTool('linkChecker');
             })
             .on('pointerup', () => {
-                checkImage.setStyle({ backgroundColor: '#e3eafc' });
-            })
-            .on('pointerover', () => {
-                checkImage.setStyle({ backgroundColor: '#bbdefb'});
-                checkImage.scale = 1.15;
-            })
-            .on('pointerout', () => {
-                checkImage.setStyle({ backgroundColor: '#e3eafc'});
-                checkImage.scale = 1;
+                linkCheckerBox.setStyle({ backgroundColor: '#e3eafc' });
             });
-        // Responsive Check Source button
-        const checkSource = this.add.text(200, 0, '🔗 Src', {
-            fontSize: '28px',
-            color: '#1976d2',
+        // Check Source button
+        const checkSource = this.add.text(350, 0, 'Foogle - Suche', {
             fontFamily: 'Roboto',
-            fontStyle: 'bold',
-            backgroundColor: '#e3eafc',
+            fontSize: '24px',
+            color: '#1976d2',
+        }).setOrigin(0.5);
+        const checkSourceBox = this.add.text(525, 95, 'Suche mehr Infos ...', {
+            fontSize: '20px',
+            color: '#888888',
+            fontFamily: 'Roboto',
+            fontStyle: 'italic',
+            backgroundColor: '#ffffff',
             padding: { left: 16, right: 16, top: 8, bottom: 8 },
         })
             .setOrigin(0.5)
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
-                checkSource.setStyle({ backgroundColor: '#bbdefb' });
+                checkSourceBox.setStyle({ backgroundColor: '#bbdefb' });
                 this.useTool('check-source');
             })
             .on('pointerup', () => {
-                checkSource.setStyle({ backgroundColor: '#e3eafc' });
-            })
-            .on('pointerover', () => {
-                checkSource.setStyle({ backgroundColor: '#bbdefb'});
-                checkSource.scale = 1.15;
-            })
-            .on('pointerout', () => {
-                checkSource.setStyle({ backgroundColor: '#e3eafc'});
-                checkSource.scale = 1;
+                checkSourceBox.setStyle({ backgroundColor: '#e3eafc' });
             });
-        toolPanel.add([checkImage, checkSource]);
+        // Check Image button
+        const checkImage = this.add.text(700, 0, 'Reverse Image Suche', {
+            fontFamily: 'Roboto',
+            fontSize: '24px',
+            color: '#1976d2',
+        }).setOrigin(0.5);
+        const checkImageBox = this.add.text(845, 95, 'Suche Fotos/Bilder ...', {
+            fontSize: '20px',
+            color: '#888888',
+            fontFamily: 'Roboto',
+            fontStyle: 'italic',
+            backgroundColor: '#ffffff',
+            padding: { left: 16, right: 16, top: 8, bottom: 8 },
+        })
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                checkImageBox.setStyle({ backgroundColor: '#bbdefb' });
+                this.useTool('check-image');
+            })
+            .on('pointerup', () => {
+                checkImageBox.setStyle({ backgroundColor: '#e3eafc' });
+            });
+        toolPanel.add([linkChecker, checkImage, checkSource]);
     }
 
     private createDropZones() {
-        // Fake News drop zone (left)
-        this.fakeDropZone = this.add.zone(320, 640, 450, 120).setRectangleDropZone(500, 120);
-        this.fakeDropZoneLabel = this.add.text(320, 640, '🚫 Mark as Fake', {
-            fontSize: '24px',
-            color: '#fff',
-            backgroundColor: '#d32f2f',
-            fontFamily: 'Roboto',
-            fontStyle: 'bold',
-            padding: { left: 40, right: 40, top: 24, bottom: 24 },
-        }).setOrigin(0.5);
-        this.fakeDropZone.setData('type', 'fake');
-
-        // Real News drop zone (right)
-        this.realDropZone = this.add.zone(750, 640, 450, 120).setRectangleDropZone(500, 120);
-        this.realDropZoneLabel = this.add.text(750, 640, '✅ Mark as Real', {
-            fontSize: '24px',
-            color: '#fff',
-            backgroundColor: '#388e3c',
-            fontFamily: 'Roboto',
-            fontStyle: 'bold',
-            padding: { left: 40, right: 40, top: 24, bottom: 24 },
-        }).setOrigin(0.5);
-        this.realDropZone.setData('type', 'real');
+        // Link-Checker drop zone
+        this.linkDropZone = this.add.zone(100, 150, 200, 120).setRectangleDropZone(200, 120);
+        
+        // Image drop zone 
+        this.imageDropZone = this.add.zone(700, 150, 200, 120).setRectangleDropZone(200, 120);
+    
     }
 
     private createLegendPanel() {
@@ -205,51 +229,42 @@ export class NewsFeed extends Scene {
         // Chat bubbles / tips
         const chatBubbles = [
             this.add.text(-130, -140, '💬 Hey, need a tip? Use the tools below to research!', {
-                fontSize: '18px', color: '#1976d2', fontFamily: 'Arial', wordWrap: { width: 270 }
+                fontSize: '18px', color: '#1976d2', fontFamily: 'Roboto', wordWrap: { width: 270 }
             }),
             this.add.text(-130, -70, '😏 Remember: If it sounds too wild, it probably is.', {
-                fontSize: '18px', color: '#222', fontFamily: 'Arial', wordWrap: { width: 270 }
+                fontSize: '18px', color: '#222', fontFamily: 'Roboto', wordWrap: { width: 270 }
             }),
             this.add.text(-130, 0, '😂 Some posts are just memes in disguise.', {
-                fontSize: '18px', color: '#888', fontFamily: 'Arial', wordWrap: { width: 270 }
+                fontSize: '18px', color: '#888', fontFamily: 'Roboto', wordWrap: { width: 270 }
             }),
             this.add.text(-130, 70, '🧐 Double-check the source, always!', {
-                fontSize: '18px', color: '#1976d2', fontFamily: 'Arial', wordWrap: { width: 270 }
+                fontSize: '18px', color: '#1976d2', fontFamily: 'Roboto', wordWrap: { width: 270 }
             }),
             this.add.text(-130, 140, '🔥 Don\'t let fake news go viral!', {
-                fontSize: '18px', color: '#d32f2f', fontFamily: 'Arial', wordWrap: { width: 270 }
+                fontSize: '18px', color: '#d32f2f', fontFamily: 'Roboto', wordWrap: { width: 270 }
             })
         ];
         legendPanel.add([bg, ...chatBubbles]);
     }
 
-    private initializePosts() {
-        // Add some initial sample posts
-        this.posts = [
-            {
-                id: 1,
-                content: "Breaking: Scientists discover new planet in our solar system!",
-                image: "planet.jpg",
-                source: "SpaceNews.com",
-                date: "2024-03-20",
-                isFake: true,
-                viralScore: 0
-            },
-            // Add more sample posts here
-        ];
-    }
-
-    private spawnNewPost() {
+    private spawnNewPost(
+        posts:{   
+            id: string; 
+            content: string; 
+            source?: string; 
+            img?: string;
+            category: string 
+        }[]) {
         // Only spawn if fewer than maxPostsOnScreen posts are on screen
         const activePosts = this.children.list.filter(obj =>
-            obj instanceof Phaser.GameObjects.Container && (obj as any).isNewsPost === true
+            obj instanceof Phaser.GameObjects.Container
         ).length;
         if (activePosts >= this.maxPostsOnScreen) {
             return;
         }
-        if (this.posts.length === 0) return;
+        if (posts.length === 0) return;
         // Always use the first post in the array (as before)
-        const post = this.posts[0];
+        const post = posts[0];
         const postContainer = this.createPostElement(post);
         // Add animation for post appearing
         postContainer.setAlpha(0);
@@ -260,62 +275,117 @@ export class NewsFeed extends Scene {
         });
     }
 
-    private createPostElement(post: NewsPost): Phaser.GameObjects.Container {
+    private createPostElement(
+        post:{   
+            id: string; 
+            content: string; 
+            source?: string; 
+            img?: string;
+            category: string 
+        }): Phaser.GameObjects.Container {
         // Smaller post card
-        const cardWidth = 800;
-        const cardHeight = 170;
+        const cardWidth = 750;
+        const cardHeight = 150;
         const container = this.add.container(450, this.feedY);
         this.feedY += cardHeight + 25; // Stack posts vertically with margin
         container.setSize(cardWidth, cardHeight);
         container.setInteractive();
         this.input.setDraggable(container);
-        const bg = this.add.rectangle(0, 0, cardWidth, cardHeight, 0xffffff)
+        const bg = this.add.rectangle(450, 220, cardWidth, cardHeight, 0xffffff)
             .setOrigin(0.5)
             .setStrokeStyle(4, 0x1976d2)
             .setAlpha(0.99);
         // Pick random avatar and username for each card
-        const avatar = this.avatars[Math.floor(Math.random() * this.avatars.length)];
+        const randomIndex = Math.floor(Math.random() * this.avatarKeys.length);
+        const randomAvatarKey = this.avatarKeys[randomIndex];
         const username = this.usernames[Math.floor(Math.random() * this.usernames.length)];
-        const timestamp = post.date + ' • ' + (Math.floor(Math.random() * 23) + 1) + 'h ago';
+        const generatedDate = this.getRandomDate();
+        const timestamp = generatedDate + ' • ' + (Math.floor(Math.random() * 23) + 1) + 'h ago';
         // Top row: avatar, username, timestamp (left), date (right)
-        const topRowY = -cardHeight/2 + 32;
-        const avatarText = this.add.text(-cardWidth/2 + 32, topRowY, avatar, {
-            fontSize: '28px', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0.5);
-        const usernameText = this.add.text(-cardWidth/2 + 70, topRowY, username, {
-            fontSize: '20px', color: '#1976d2', fontFamily: 'Arial', fontStyle: 'bold'
+        const topRowY = cardHeight + 25;
+        const avatar = this.add.image(cardWidth/8 + 15, topRowY, randomAvatarKey)
+        .setDisplaySize(30,30)
+        .setOrigin(0.5);
+        const usernameText = this.add.text(cardWidth/8 + 45, topRowY, username, {
+            fontSize: '20px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'bold'
         }).setOrigin(0, 0.5);
-        const timeText = this.add.text(-cardWidth/2 + 70 + usernameText.width + 12, topRowY, timestamp, {
-            fontSize: '13px', color: '#888', fontFamily: 'Arial', fontStyle: 'normal'
+        const timeText = this.add.text(cardWidth/9 + 75 + usernameText.width, topRowY, timestamp, {
+            fontSize: '13px', color: '#888', fontFamily: 'Roboto', fontStyle: 'normal'
         }).setOrigin(0, 0.5);
-        // Date only, right-aligned
-        const date = this.add.text(cardWidth/2 - 20, topRowY, post.date, {
-            fontSize: '13px', color: '#666', fontFamily: 'Arial', fontStyle: 'normal'
-        }).setOrigin(1, 0.5);
+
         // Content (centered, smaller, more margin)
-        const content = this.add.text(0, 18, post.content, {
-            fontSize: '20px', color: '#222', fontFamily: 'Arial', fontStyle: 'bold', wordWrap: { width: cardWidth - 80 }, align: 'center'
+        const content = this.add.text(cardWidth/2 + 95, topRowY + 32, post.content, {
+            fontSize: '20px', color: '#222', fontFamily: 'Roboto', fontStyle: 'bold', wordWrap: { width: cardWidth - 75 }, align: 'center'
         }).setOrigin(0.5);
-        // Bottom row: source (left), 'Viral' label, viral bar (right)
-        const bottomRowY = 60;
-        const source = this.add.text(-cardWidth/2 + 70, bottomRowY, `Source: ${post.source}`, {
-            fontSize: '15px', color: '#1976d2', fontFamily: 'Arial', fontStyle: 'normal'
+
+        /*
+
+
+        const viralLabel = this.add.text(cardWidth/2 + 20, -bottomRowY, 'Viral:', {
+            fontSize: '15px', color: '#d32f2f', fontFamily: 'Roboto', fontStyle: 'bold'
         }).setOrigin(0, 0.5);
-        const viralLabel = this.add.text(cardWidth/2 - 270, bottomRowY, 'Viral:', {
-            fontSize: '15px', color: '#d32f2f', fontFamily: 'Arial', fontStyle: 'bold'
+        //const barWidth = 220;
+        //const barHeight = 10;
+        const viralBarBg = this.add.rectangle(-cardWidth/2 + 120, -bottomRowY, 100, 10, 0xe0e0e0).setOrigin(0, 0.5);
+        const viralBar = this.add.rectangle(-cardWidth/2 + 120, -bottomRowY, 0, 10, post.category == 'fake' ? 0xd32f2f : 0x388e3c).setOrigin(0, 0.5);
+        
+        // Add button for fake, real new
+                        /* Date only, right-aligned
+        const date = this.add.text(cardWidth/2 - 20, topRowY, generatedDate, {
+            fontSize: '13px', color: '#666', fontFamily: 'Roboto', fontStyle: 'normal'
         }).setOrigin(1, 0.5);
-        const barWidth = 220;
-        const barHeight = 10;
-        const viralBarBg = this.add.rectangle(cardWidth/2 - barWidth - 30, bottomRowY, barWidth, barHeight, 0xe0e0e0).setOrigin(0, 0.5);
-        const viralBar = this.add.rectangle(cardWidth/2 - barWidth - 30, bottomRowY, 0, barHeight, post.isFake ? 0xd32f2f : 0x388e3c).setOrigin(0, 0.5);
+        const centerX = cardWidth/2 - 20;
+        const centerY = topRowY;
+        const spacing = 30; // distance between buttons
+
+        // Color of buttons
+        const colors = [0x00cc00, 0xe74c3c, 0x95a5a6]; 
+
+        // Array buttons
+        //const buttons: Phaser.GameObjects.Arc[] = [];
+
+        // Create selected button
+        let selectionCircle: Phaser.GameObjects.Arc | null = null;
+
+        colors.forEach((color, index) => {
+            const x = centerX + index * spacing;
+
+            const button = this.add.circle(x, centerY, 10, color)
+                .setInteractive({ useHandCursor: true });
+
+            button.on('pointerdown', () => {
+                selectionCircle = this.add.circle(button.x, button.y, 14)
+                    .setStrokeStyle(2, 0xffffff)
+                    .setDepth(0);
+            });
+
+            //buttons.push(button);
+        });
+
+
+        /* Source
+        const bottomRowY = 40;
+        let source = null;
+        let image = null;
+        if(post.source) {
+            source = this.add.text(-cardWidth/2 + 20, bottomRowY, `Source: ${post.source}`, {
+            fontSize: '15px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'normal'
+        }).setOrigin(0, 0.5);
+        }
+        // Image
+        if(post.img) {
+            image = this.add.image(cardWidth/2 -80, 0, `postImg${post.id}`).setOrigin(0.5).setDisplaySize(120, 100);;
+        }
         // Add all elements to the container
-        container.add([bg, avatarText, usernameText, timeText, date, content, source, viralLabel, viralBarBg, viralBar]);
-        (container as any).isNewsPost = true;
+        container.add([bg, avatar, usernameText, timeText, content, viralLabel, viralBarBg, viralBar]);
+        if(source != null) container.add(source);
+        if (image != null) container.add(image);
+        //(container as any).isNewsPost = true;
         (container as any).viralBar = viralBar;
         (container as any).viralText = viralLabel;
         
         // Post selection logic
-        container.on('pointerdown', () => {
+        source?.on('pointerdown', () => {
             if (this.selectedPostContainer) {
                 (this.selectedPostContainer.list[0] as Phaser.GameObjects.Rectangle).setStrokeStyle(4, 0xe0e0e0);
             }
@@ -325,18 +395,18 @@ export class NewsFeed extends Scene {
         });
 
         // Drag and drop logic
-        container.on('dragstart', () => {
-            container.setDepth(10);
+        source?.on('dragstart', () => {
+            source.setDepth(10);
         });
-        container.on('drag', (pointer: any, dragX: number, dragY: number) => {
-            container.x = dragX;
-            container.y = dragY;
+        source?.on('drag', (pointer: any, dragX: number, dragY: number) => {
+            source.x = dragX;
+            source.y = dragY;
         });
-        container.on('dragend', (pointer: any, dragX: number, dragY: number, dropped: boolean) => {
-            // Do nothing: let the post stay where it was dragged
-        });
+        source?.on('dragend', (pointer: any, dragX: number, dragY: number, dropped: boolean) => {
+            // Do something: come back to its position
+        });*/
 
-        // Drop zone logic
+        /* Drop zone logic
         this.input.on('drop', (pointer: any, gameObject: any, dropZone: any) => {
             if (gameObject === container) {
                 let correct = false;
@@ -358,7 +428,7 @@ export class NewsFeed extends Scene {
                     this.selectedPost = null;
                 }
             }
-        });
+        });*/
         return container;
     }
 
@@ -406,13 +476,20 @@ export class NewsFeed extends Scene {
         }
     }
 
-    update(time: number, delta: number) {
+    /*update(time: number, delta: number, 
+        posts: {
+            id: string; 
+            content: string; 
+            source?: string; 
+            img?: string;
+            category: string 
+    }[]) {
         // Each post's viral score increases so it reaches 100 in 90 seconds (1.11 per second)
         const viralIncrement = (100 / 90) * (delta / 1000); // delta is ms
         let gameOver = false;
         this.children.list.forEach(obj => {
             if (obj instanceof Phaser.GameObjects.Container && (obj as any).isNewsPost === true) {
-                const post = this.posts[0]; // For now, just use the first post
+                const post = posts[0]; // For now, just use the first post
                 if (post) {
                     post.viralScore = Math.min(100, post.viralScore + viralIncrement);
                     // Update viral bar and text
@@ -433,5 +510,12 @@ export class NewsFeed extends Scene {
             this.scene.start('GameOver', { score: this.score });
         }
         this.scoreText.setText(`Score: ${this.score}`);
+    }*/
+
+    private getRandomDate(): string {
+        const today = new Date();
+        const daysAgo = Math.floor(Math.random() * 7);
+        today.setDate(today.getDate() - daysAgo);
+        return today.toLocaleDateString('de-DE'); // for example: "20.06.2025"
     }
 } 
