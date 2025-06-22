@@ -4,56 +4,76 @@
       "id": "p1",
       "content": "Schaut euch den Artikel an: Die Tricks, wie man am schnellsten reich wird!",
       "source": "http://express.to/tricks-schnell-reich",
-      "category": "fake"
+      "contentFoogleSearch": "Sternweg Film\n\nStudio M vorerst mit Sternweg fertig. Bei einer Pressekonferenz gab Studiorepressantant W. D. an, bald einen neues über das nächste Projekt des Studios anzugeben. Es soll allerdings kein zehnter Teil in der Sternweg Serie sein.",      
+      "imgWithFoogle": "assets/ImagesLevel3/earth.jpg",
+      "key": "tricks",
+      "img": "assets/ImagesLevel3/cakes.jpg",
+      "category": "fake",
+      "viralScore": 0
     },
     {
       "id": "p2",
-      "content": "Wusstet ihr, dass Möhren gut fürs  Singen sind?",
-      "source": "https://www.news.de/der-sternenherald/aktuelle-heute",
-      "category": "real"
-    },
+      "content": "Happy Birthday Chris. Schon 3 Jahre alt heute.",
+      "img": "assets/ImagesLevel3/cakes.jpg",
+      "key": "Happy Birthday",
+      "category": "normal",
+      "viralScore": 0
+    },    
     {
       "id": "p3",
-      "content": "Mütter, füttert euren Kindern keine Zwiebeln! Die sind extreme gafährlich.",
-      "source": "https://meinungsblock.net",
-      "category": "fake"
+      "content": "Wusstet ihr, dass Möhren gut fürs  Singen sind?",
+      "source": "https://www.news.de/der-sternenherald/aktuelle-heute",
+      "contentFoogleSearch": "MÖHREN STÄRKEN STIMMBÄNDER, NEUE STUDIE ZEIGT.\n\nEine neue Studie von 300 Chorsänger zeigt eine Korrelation zwischen dem Konsum von Karotten und  der Gesundheit der Stimmbänder.",      
+      "category": "real",
+      "viralScore": 7
     },
     {
       "id": "p4",
-      "content": "Aufgepasst, falls ihr Spinat beim Bigl gekauft hab! Der ist nömlich Giftig",
-      "source": "https://www.zentrale-konsumerschutzbehoerde.de/spinat-giftig",
-      "category": "real"
+      "content": "Ein Quellensystem? Glaube nicht, dass die Leute das oft benutzen.",
+      "category": "normal",
+      "viralScore": 0
     },
     {
       "id": "p5",
-      "content": "Ein neuer Sternweg Film soll rauskommen? Ernsthaft? Nach dem letzten flopp?",
-      "source": "https://tagesdruck.net/new-sternweg",
-      "category": "fake"
+      "content": "Werde mir die ganze Sternenwegreihe in einer Sitzung ansehen. Wünscht mir Glück!",
+      "category": "normal",
+      "viralScore": 4
     },
     {
       "id": "p6",
-      "content": "Ein Quellensystem? Glaube nicht, dass die Leute das oft benutzen.",
-      "category": "normal"
+      "content": "Mütter, füttert euren Kindern keine Zwiebeln! Die sind extreme gafährlich.",
+      "source": "https://meinungsblock.net",
+      "contentFoogleSearch": "Die Gefahr von Zwiebeln\n\nZwiebeln sind Erdfrüchte und somit spirituel mit ihr Verbunden. Sie zu essen unterbicht die wichtige Strahlung der Sterne...",
+      "category": "fake",
+      "viralScore": 5
     },
     {
       "id": "p7",
-      "content": "Neko ist so süß!",
-      "category": "normal"
+      "content": "Aufgepasst, falls ihr Spinat beim Bigl gekauft hab! Der ist nömlich Giftig",
+      "source": "https://www.zentrale-konsumerschutzbehoerde.de/spinat-giftig",
+      "contentFoogleSearch": "WARNUNG: Gefahr von Schadstoffen bei Spinat\n\nBei der Supermarktkette Bigl wurden Dosen Spinat mit ...",
+      "category": "real",
+      "viralScore": 2
     },
     {
       "id": "p8",
-      "content": "Werde mir die ganze Sternenwegreihe in einer Sitzung ansehen. Wünscht mir Glück!",
-      "category": "normal"
+      "content": "Neko ist so süß!",
+      "category": "normal",
+      "viralScore": 0
     },
     {
       "id": "p9",
-      "content": "Happy Birthday Chris. Schon 3 Jahre alt heute.",
-      "category": "normal"
+      "content": "Ein neuer Sternweg Film soll rauskommen? Ernsthaft? Nach dem letzten flopp?",
+      "source": "https://tagesdruck.net/new-sternweg",
+      "contentFoogleSearch": "Sternweg Film\n\nStudio M vorerst mit Sternweg fertig. Bei einer Pressekonferenz gab Studiorepressantant W. D. an, bald einen neues über das nächste Projekt des Studios anzugeben. Es soll allerdings kein zehnter Teil in der Sternweg Serie sein.",
+      "category": "fake",
+      "viralScore": 2
     },
     {
       "id": "p10",
       "content": "LET'S GO FC Gröhnhalt!",
-      "category": "normal"
+      "category": "normal",
+      "viralScore": 0
     }
   ],
 
@@ -62,52 +82,73 @@
       "id": "p1",
       "content": "Ich kann's kaum glauben, dass ein neuer Flachwelt-film erstellt wird!",
       "source": "https://tagesdruck.net/flachwelt-roman-film",
-      "category": "real"
+      "contentFoogleSearch": "FLACHWELT ROMAN BEWEISE!\n\nFLACHWELT ROMAN BEWEISE! BEWEISE! VON STUDIO M VERFILMT! Ein weiterer der beliebten Romane von P. Tretcher wird verfilmt mit Crow Longford als Hauptcharacter Patrizier",
+      "imgWithFoogle": "assets/ImagesLevel3/earth.jpg",
+      "key": "Flachwelt-film",
+      "category": "real",
+      "viralScore": 0
     },
     {
       "id": "p2",
       "content": "Der Patrizier hätte Stillschweiger sein sollten, aber der Direktor mag den Kerl einfach nicht?",
-      "category": "fake"
+      "contentFoogleSearch": "ROMEO-IN-DEN-STERNEN SCHAUSPIELER ENTHÜLLT\n\nRomeo soll von Stillschweiger gespielt werden,  der die Rolle des Patriziers in Beweise! Beweise! dafür abgelehnt hat.",
+      "key": "Stillschweiger",
+      "category": "fake",
+      "viralScore": 4
     },
     {
       "id": "p3",
-      "content": "Der FC Gröhnhalt ist diese Saison komplett unaufhaltbar! Niemand steht uns im Weg",
-      "category": "fake"
+      "content": "Ich hoffe darauf, das Spülie der Maggier einen Cameo im neuen Film hat. Der ist so lustig",
+      "category": "normal",
+      "viralScore": 0
     },
     {
       "id": "p4",
-      "content": "Timo Friedberg ist so ein Dreckssack. Von wegen \"Fairer Sportgeist\", der respektiert ja keinen seiner Mitspieler",
-      "category": "real"
+      "content": "Flachwelt Regisseur wer?",
+      "category": "normal",
+      "viralScore": 0
     },
     {
       "id": "p5",
-      "content": "Ich weiss nicht, ob ihr es bemerkt habt, aber die Athenestatue ist noch immer weg",
-      "category": "real"
+      "content": "Timo Friedberg ist so ein Dreckssack. Von wegen \"Fairer Sportgeist\", der respektiert ja keinen seiner Mitspieler",
+      "contentFoogleSearch": "FRIEDBERG DISQUALIFIZIERT UNTER DOPING-VERDACHT\n\nDie Behörde für Sportliche Integrität bestätigt, dass Timo Friedberg nach drei Kontrollen des doping schuldig sei",
+      "key": "Friedberg",
+      "category": "real",
+      "viralScore": 3
     },
     {
       "id": "p6",
-      "content": "Ich hoffe darauf, das Spülie der Maggier einen Cameo im neuen Film hat. Der ist so lustig",
-      "category": "normal"
+      "content": "Romeo-in-den-Sternen klingt nicht sehr vielversprechend. Werd ich mir erst anschauen nachdem Reviews raus sind.",
+      "category": "normal",
+      "viralScore": 6
     },
     {
       "id": "p7",
-      "content": "Flachwelt Regisseur wer?",
-      "category": "normal"
+      "content": "Ich weiss nicht, ob ihr es bemerkt habt, aber die Athenestatue ist noch immer weg",
+      "contentFoogleSearch": "ATHENE STATUE SPURLOS VERSCHWUNDEN\n\nDie Polizei ist ratlos, da die Kameras zur Tatzeit fehlgeschlagen haben. Es wird weiter nach hinweisen gesucht.",
+      "key": "Athene",
+      "category": "real",
+      "viralScore": 8
     },
     {
       "id": "p8",
-      "content": "Romeo-in-den-Sternen klingt nicht sehr vielversprechend. Werd ich mir erst anschauen nachdem Reviews raus sind.",
-      "category": "normal"
+      "content": "Die Tage müssten echt länger sein, um die ganze Arbeit rechtzeitig zu beenden.",
+      "category": "normal",
+      "viralScore": 7
     },
     {
       "id": "p9",
-      "content": "Die Tage müssten echt länger sein, um die ganze Arbeit rechtzeitig zu beenden.",
-      "category": "normal"
+      "content": "Bin jetzt an Flachwelt interessiert. Kann mir ein Kenner ein gutes Einsteigerbuch verraten?",
+      "category": "normal",
+      "viralScore": 0
     },
     {
       "id": "p10",
-      "content": "Bin jetzt an Flachwelt interessiert. Kann mir ein Kenner ein gutes Einsteigerbuch verraten?",
-      "category": "normal"
+      "content": "Der FC Gröhnhalt ist diese Saison komplett unaufhaltbar! Niemand steht uns im Weg",
+      "contentFoogleSearch": "Ergebnisse der Saisonalen Spiele\n\nErgebnisse der Saisonalen Spiele: Es gibt insgesamt 8 Spiele, Grönhalt spielte in 3 mit und verlor alle drei Haushoch, im Vormate TEAM 3:0 TEAM",
+      "key": "Gröhnhalt",
+      "category": "fake",
+      "viralScore": 9
     }
   ],
 
@@ -116,56 +157,73 @@
       "id": "p1",
       "content": "ENDLICH MAL! Eine Dokumentation, die Beweist, die Erde ist doch flach",
       "img": "assets/ImagesLevel3/earth.jpg",
-      "category": "fake"
+      "category": "fake",
+      "viralScore": 2
     },
     {
       "id": "p2",
       "content": "So gehört sich das. Wer bei Sport nur mogeln kann, soll abgeführt werden",
+      "contentFoogleSearch": "FRIEDBERG DISQUALIFIZIERT UNTER DOPING-VERDACHT\n\nDie Behörde für Sportliche Integrität bestätigt, dass Timo Friedberg nach drei Kontrollen des doping schuldig sei",
+      "imgWithFoogle": "assets/ImagesLevel3/timoFriedberg.",
+      "key": "Sport",
       "img": "assets/ImagesLevel3/timoFriedberg.",
-      "category": "fake"
+      "category": "fake",
+      "viralScore": 8
     },
     {
       "id": "p3",
-      "content": "Neue Szenen aus Beweise! Beweise! wurden geleakt Seht euch das an",
-      "source": "http://express.de/neue-szenen",
-      "category": "fake"
+      "content": "Kann es sein, dass in der letzten Zeit weniger Blödsinn geposted wird.",
+      "category": "normal",
+      "viralScore": 3
     },
     {
       "id": "p4",
-      "content": "Also, man hätte ja auch erwarten können, dass die Athene-Angelegenheit nur Versicherungsbetrug ist",
-      "category": "real"
+      "content": "Für die, die wegen dem neuen Film interessiert sind: \"Auf Tod\" ist ein guter Einstieg!",
+      "category": "normal",
+      "viralScore": 4
     },
     {
       "id": "p5",
-      "content": "250 Pfankuchen! Wir haben den Rekord geknackt",
-      "img": "assets/ImagesLevel3/cakes.jpg",
-      "category": "real"
+      "content": "Also, man hätte ja auch erwarten können, dass die Athene-Angelegenheit nur Versicherungsbetrug ist",
+      "contentFoogleSearch": "ATHENE STATUE WIEDERGEFUNDEN\n\nDer Direktor des Museums wurde wegen versuchten Versicherungsbetrugs in Haft genommen. 8~ Montagsreport ~)",
+      "key": "Versicherungsbetrug",
+      "category": "real",
+      "viralScore": 0
     },
     {
       "id": "p6",
       "content": "Phoebe ist mal wieder eine Katastrophe",
       "img": "assets/ImagesLevel3/katzen.jpg",
-      "category": "normal"
+      "category": "normal",
+      "viralScore": 5
     },
     {
       "id": "p7",
-      "content": "Kann es sein, dass in der letzten Zeit weniger Blödsinn geposted wird.",
-      "category": "normal"
+      "content": "250 Pfankuchen! Wir haben den Rekord geknackt",
+      "contentFoogleSearch": "PFANNKUCHENTURM-REKORD GEBROCHEN\n\nMit 250 Pfankuchen und über 1.10m höhe wurde der neue Rekord offiziell anerkannt. (~ Der Sternenherald ~)",
+      "key": "Pfankuchen",
+      "img": "assets/ImagesLevel3/cakes.jpg",
+      "category": "real",
+      "viralScore": 3
     },
     {
       "id": "p8",
-      "content": "Für die, die wegen dem neuen Film interessiert sind: \"Auf Tod\" ist ein guter Einstieg!",
-      "category": "normal"
+      "content": "Glaubt ihr die Göttin Athene würde Versicherungsbetrug gutheißen? Ist ehr eine Hermes-Sache, oder?",
+      "category": "normal",
+      "viralScore": 9
     },
     {
       "id": "p9",
-      "content": "Glaubt ihr die Göttin Athene würde Versicherungsbetrug gutheißen? Ist ehr eine Hermes-Sache, oder?",
-      "category": "normal"
+      "content": "Neue Szenen aus Beweise! Beweise! wurden geleakt Seht euch das an",
+      "source": "http://express.de/neue-szenen",
+      "category": "fake",
+      "viralScore": 7
     },
     {
       "id": "p10",
       "content": "Hat jemand lustige Ideen für neue Sprichwörter? Die alten werden langsam alt.",
-      "category": "normal"
+      "category": "normal",
+      "viralScore": 9
     }
   ]
 }
