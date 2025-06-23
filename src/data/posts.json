@@ -4,18 +4,12 @@
       "id": "p1",
       "content": "Schaut euch den Artikel an: Die Tricks, wie man am schnellsten reich wird!",
       "source": "http://express.to/tricks-schnell-reich",
-      "contentFoogleSearch": "Sternweg Film\n\nStudio M vorerst mit Sternweg fertig. Bei einer Pressekonferenz gab Studiorepressantant W. D. an, bald einen neues über das nächste Projekt des Studios anzugeben. Es soll allerdings kein zehnter Teil in der Sternweg Serie sein.",      
-      "imgWithFoogle": "assets/ImagesLevel3/earth.jpg",
-      "key": "tricks",
-      "img": "assets/ImagesLevel3/cakes.jpg",
       "category": "fake",
       "viralScore": 0
     },
     {
       "id": "p2",
       "content": "Happy Birthday Chris. Schon 3 Jahre alt heute.",
-      "img": "assets/ImagesLevel3/cakes.jpg",
-      "key": "Happy Birthday",
       "category": "normal",
       "viralScore": 0
     },    
@@ -112,6 +106,7 @@
       "id": "p5",
       "content": "Timo Friedberg ist so ein Dreckssack. Von wegen \"Fairer Sportgeist\", der respektiert ja keinen seiner Mitspieler",
       "contentFoogleSearch": "FRIEDBERG DISQUALIFIZIERT UNTER DOPING-VERDACHT\n\nDie Behörde für Sportliche Integrität bestätigt, dass Timo Friedberg nach drei Kontrollen des doping schuldig sei",
+      "imgWithFoogle": "assets/ImagesLevel3/timoFriedbergFoogle.png",
       "key": "Friedberg",
       "category": "real",
       "viralScore": 3
@@ -156,6 +151,8 @@
     {
       "id": "p1",
       "content": "ENDLICH MAL! Eine Dokumentation, die Beweist, die Erde ist doch flach",
+      "contentFoogleSearch": "FLACHWELT ROMAN BEWEISE!\n\nFLACHWELT ROMAN BEWEISE! BEWEISE! VON STUDIO M VERFILMT! Ein weiterer der beliebten Romane von P. Tretcher wird verfilmt mit Crow Longford als Hauptcharacter Patrizier",
+      "imgWithFoogle": "assets/ImagesLevel3/earth.jpg",
       "img": "assets/ImagesLevel3/earth.jpg",
       "category": "fake",
       "viralScore": 2
@@ -164,9 +161,9 @@
       "id": "p2",
       "content": "So gehört sich das. Wer bei Sport nur mogeln kann, soll abgeführt werden",
       "contentFoogleSearch": "FRIEDBERG DISQUALIFIZIERT UNTER DOPING-VERDACHT\n\nDie Behörde für Sportliche Integrität bestätigt, dass Timo Friedberg nach drei Kontrollen des doping schuldig sei",
-      "imgWithFoogle": "assets/ImagesLevel3/timoFriedberg.",
+      "imgWithFoogle": "assets/ImagesLevel3/timoFriedbergFoogle.png",
       "key": "Sport",
-      "img": "assets/ImagesLevel3/timoFriedberg.",
+      "img": "assets/ImagesLevel3/timoFriedberg.png",
       "category": "fake",
       "viralScore": 8
     },
@@ -193,7 +190,7 @@
     {
       "id": "p6",
       "content": "Phoebe ist mal wieder eine Katastrophe",
-      "img": "assets/ImagesLevel3/katzen.jpg",
+      "img": "assets/ImagesLevel3/katzen.png",
       "category": "normal",
       "viralScore": 5
     },
@@ -201,6 +198,7 @@
       "id": "p7",
       "content": "250 Pfankuchen! Wir haben den Rekord geknackt",
       "contentFoogleSearch": "PFANNKUCHENTURM-REKORD GEBROCHEN\n\nMit 250 Pfankuchen und über 1.10m höhe wurde der neue Rekord offiziell anerkannt. (~ Der Sternenherald ~)",
+      "imgWithFoogle": "assets/ImagesLevel3/cakes.jpg",
       "key": "Pfankuchen",
       "img": "assets/ImagesLevel3/cakes.jpg",
       "category": "real",

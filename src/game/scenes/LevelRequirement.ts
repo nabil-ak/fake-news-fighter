@@ -1,27 +1,27 @@
 import { Scene } from 'phaser';
 
 export type LevelData = {
-  levelID: number;
-  requirements: string;
-  postSetId: string;
+    levelID: number;
+    requirements: string;
+    postSetId: string;
 };
 
 const levels: LevelData[] = [
-  {
-    "levelID": 1,
-    "requirements": "- Verwende den Link-Checker, um den Link im Beitrag zu überprüfen.\n- Ist er grün? Nicht sofort vertrauen - klicke drauf und überprüfe die Seite.\n- Markiere den Beitrag als fake    , echt     oder irrelevant    .\n*Achtung:\nEin Klick auf einen gefährlichen Link = Game Over!\nFalsche Einordnung = Punktabzug!",
-    "postSetId": "set1"
-  },
-  {
-    "levelID": 2,
-    "requirements": "Sehr gut, du hast das erste Level geschafft!\nJetzt wird/'s schwieriger: Manche Posts haben keinen Link.\nBei solchen musst du unser neues Tool verwenden - die Foogle-Suche.\n -> Was sagen andere Quellen? Gibt es Belege?\nDann entscheidest du wieder: Fake News, echt oder irrelevant.",
-    "postSetId": "set2"
-  },
-  {
-    "levelID": 3,
-    "requirements": "Willkommen in der Meisterstufe!\nWas tun, wenn es um ein Bild geht?\n-> Zieh das Bild mit Drag & Drop ins neue Tool: Reverse Image Search.\nEs zeigt dir z.B.\n- dieselbes Bild auf einer seriösen Seite,\n- ein ähnliches Bild, das ein bisschen anders aussieht? (-> vielleicht bearbeitet?),\n- oder gar kein Ergebnis (-> womöglich generiert oder manipuliert).\n- Kombiniere jetzt alle Tools! Nur wer genau prüft, erkennt die Wahrheit hinter den Posts.",
-    "postSetId": "set3"
-  }
+    {
+        "levelID": 1,
+        "requirements": "- Verwende den Link-Checker, um den Link im Beitrag zu überprüfen.\n- Ist er grün? Nicht sofort vertrauen - klicke drauf und überprüfe die Seite.\n- Markiere den Beitrag als fake    , echt     oder irrelevant    .\n*Achtung:\nEin Klick auf einen gefährlichen Link = Game Over!\nFalsche Einordnung = Punktabzug!",
+        "postSetId": "set1"
+    },
+    {
+        "levelID": 2,
+        "requirements": "Sehr gut, du hast das erste Level geschafft!\nJetzt wird/'s schwieriger: Manche Posts haben keinen Link.\nBei solchen musst du unser neues Tool verwenden - die Foogle-Suche.\n -> Was sagen andere Quellen? Gibt es Belege?\nDann entscheidest du wieder: Fake News, echt oder irrelevant.",
+        "postSetId": "set2"
+    },
+    {
+        "levelID": 3,
+        "requirements": "Willkommen in der Meisterstufe!\nWas tun, wenn es um ein Bild geht?\n-> Zieh das Bild mit Drag & Drop ins neue Tool: Reverse Image Search.\nEs zeigt dir z.B.\n- dieselbes Bild auf einer seriösen Seite,\n- ein ähnliches Bild, das ein bisschen anders aussieht? (-> vielleicht bearbeitet?),\n- oder gar kein Ergebnis (-> womöglich generiert oder manipuliert).\n- Kombiniere jetzt alle Tools! Nur wer genau prüft, erkennt die Wahrheit hinter den Posts.",
+        "postSetId": "set3"
+    }
 ];
 
 
@@ -31,7 +31,7 @@ export class LevelRequirement extends Scene {
         super({ key: 'LevelRequirement' });
     }
 
-    preload(){
+    preload() {
         // Load button
         this.load.image('nonameButton2', 'assets/button/nonameButton2.png');
     }
@@ -39,7 +39,7 @@ export class LevelRequirement extends Scene {
     create() {
         // Get current level
         const currentLevel = this.registry.get('currentLevel');
-
+        console.log("currentLevel: ", currentLevel);
         // Find levelID
         const currentLevelData = levels.find(level => level.levelID === currentLevel);
         if (!currentLevelData) {
@@ -56,7 +56,7 @@ export class LevelRequirement extends Scene {
             .setStrokeStyle(2, 0xe0e0e0);
 
         // Add instructions
-        this.add.text(475, 100, 
+        this.add.text(475, 100,
             `Level ${currentLevel}:\n${currentLevelData.requirements}`, {
             fontFamily: 'Roboto',
             fontSize: '24px',
@@ -68,26 +68,26 @@ export class LevelRequirement extends Scene {
 
         // Add start button
         const buttonBg = this.add.image(775, 570, 'nonameButton2');
-        
+
         const buttonContent = this.add.text(775, 570, 'Los geht\'s!', {
             fontFamily: 'Roboto',
             fontSize: '38px',
             color: '#ffffff',
         }).setOrigin(0.5);
 
-        buttonBg.setDisplaySize(286,91)
-        .setOrigin(0.5).setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-            this.scene.start('NewsFeed');
-        })
-        .on('pointerover', () => {
-            buttonBg.setScale(0.45);
-            buttonContent.scale = 1.15;
-        })
-        .on('pointerout', () => {
-            buttonBg.setScale(0.375);
-            buttonContent.scale = 1;
-        });
+        buttonBg.setDisplaySize(286, 91)
+            .setOrigin(0.5).setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.start('NewsFeed');
+            })
+            .on('pointerover', () => {
+                buttonBg.setScale(0.45);
+                buttonContent.scale = 1.15;
+            })
+            .on('pointerout', () => {
+                buttonBg.setScale(0.375);
+                buttonContent.scale = 1;
+            });
     }
 
 }

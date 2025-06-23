@@ -36,8 +36,9 @@ export class LevelCompleteScene extends Scene {
       .setInteractive();
 
     homeButton.on('pointerdown', () => {
-            this.scene.start('MainMenu');
-            this.registry.set('currentLevel', 1);
+            this.scene.start('LevelRequirement');
+            const nextLevel = this.registry.get('currentLevel') + 1;
+            this.registry.set('currentLevel', nextLevel);
             //score
         })
         .on('pointerover', () => {

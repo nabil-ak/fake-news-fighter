@@ -1,4 +1,4 @@
-import { Scene } from 'phaser';
+import { Actions, Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 interface Post {
     id: string;
@@ -13,6 +13,7 @@ interface Post {
 
 export class NewsFeed extends Scene {
     private imagesLoaded = false;
+    private isCreated: boolean = false;
     private score: number = 0;
     private timeRemaining: number = 600; // 5 minutes in seconds
     private scoreText!: Phaser.GameObjects.Text;
@@ -36,6 +37,9 @@ export class NewsFeed extends Scene {
     private foogleSearchIsUsing: boolean = false;
     private imageSearchIsUsing: boolean = false;
 
+    private isSpawning: boolean;
+    private destroyedContainers: Set<any>;
+
     private feedY: number = 275;
     private postsData: any;
     private posts: any[];
@@ -43,28 +47,21 @@ export class NewsFeed extends Scene {
     private usernames: string[] = [
         'FactFinder', 'NewsNinja', 'MemeQueen', 'TrollHunter', 'InfoGuru', 'SatireSam', 'ViralVicky', 'TruthSeeker', 'ClickbaitCarl', 'DebunkDaisy'
     ];
-    
-    private activeContainers : number = 0;
-    private gameOver: boolean = false;
 
+    private activeContainers: number = 0;
+    private gameOver: boolean = false;
     constructor() {
         super({ key: 'NewsFeed' });
     }
 
     preload() {
-        /* Load UI assets
-        this.load.image('post-bg', 'assets/post-bg.png');
-        this.load.image('tool-bg', 'assets/tool-bg.png');
-        this.load.image('chat-bg', 'assets/chat-bg.png');
-        
-        // Load tool icons
-        this.load.image('check-image', 'assets/check-image.png');
-        this.load.image('check-source', 'assets/check-source.png');
-        this.load.image('report', 'assets/report.png');*/
+        if (this.cache.json.exists('postsData')) {
+            this.cache.json.remove('postsData');
+        }
         this.load.image('exitButton', 'assets/button/exitButton.png');
         // Load json Data
         this.load.json('postsData', 'src/data/posts.json');
-
+        console.log('this.cache.json.get: ',this.cache.json.get('postsData'))
         //Load avatars
         this.avatarKeys.forEach((key) => {
             this.load.image(key, `assets/profil/${key}.png`);
@@ -74,22 +71,30 @@ export class NewsFeed extends Scene {
         this.load.once('complete', () => {
             this.setupData();
         });
+        
     }
 
     setupData() {
         // Get current level
         const currentLevel = this.registry.get('currentLevel');
-
+        //console.log("currentLevel", currentLevel);
         // Find postSetID
         this.postsData = this.cache.json.get('postsData');
-        // console.log("this posts data includes: ", this.postsData);
         // Get posts for current level
         this.posts = this.postsData[currentLevel.toString()];
-        //console.log("this posts includes: ",this.posts);
+        console.log("this posts includes: ", this.posts);
         if (!this.posts) {
             //console.error(`No posts found for level ${currentLevel}`);
             return;
         }
+        // DEBUG: Kiểm tra tất cả images trong posts
+        /*console.log("Checking all images in posts:");
+        this.posts.forEach((post, index) => {
+            console.log(`Post ${index} (${post.id}):`, {
+                imgWithFoogle: post.imgWithFoogle,
+                fileExists: post.imgWithFoogle ? 'checking...' : 'undefined'
+            });
+        });*/
 
         if (!this.imagesLoaded) {
             this.loadImages();
@@ -97,18 +102,19 @@ export class NewsFeed extends Scene {
     }
 
     loadImages() {
+        console.log('>>> loadImages() called');
         if (!this.posts || this.posts.length === 0) return;
 
         this.posts.forEach(post => {
             const id = post.id;
-
-            if (post.img && !this.textures.exists(`postImg${id}`)) {
-                this.load.image(`postImg${id}`, post.img);
+            const texturePrefix = `level${this.registry.get('currentLevel')}_`;
+            if (post.img && !this.textures.exists(`${texturePrefix}postImg${id}`)) {
+                console.log("load img: ", `${texturePrefix}postImg${id}`);
+                this.load.image(`${texturePrefix}postImg${id}`, post.img);
             }
-            if (post.imgWithFoogle && !this.textures.exists(`foogleImg${id}`)) {
-                this.load.image(`foogleImg${id}`, post.imgWithFoogle);
-            } else if (post.imgWithFoogle) {
-                console.warn(`post.imgWithFoogle is undefined for post.id = ${id}`, post);
+            if (post.imgWithFoogle && !this.textures.exists(`${texturePrefix}foogleImg${id}`)) {
+                console.log("load img: ", `${texturePrefix}foogleImg${id}`);
+                this.load.image(`${texturePrefix}foogleImg${id}`, post.imgWithFoogle);
             }
         });
 
@@ -119,9 +125,14 @@ export class NewsFeed extends Scene {
     }
 
     create() {
+        console.log("vao create()");
+        if (this.isCreated) {
+            return;
+        }
+        this.isCreated = true;
         // Get current level
         const currentLevel = this.registry.get('currentLevel');
-
+        console.log('create curent level: ', currentLevel)
         // Add background
         this.add.rectangle(0, 0, 1280, 720, 0xcfd8dc).setOrigin(0);
 
@@ -130,8 +141,8 @@ export class NewsFeed extends Scene {
         //this.createToolPanel();
 
         this.createLinkCheckerBox();
-        this.createFoogleSearchBox(this.posts);
-        this.createImageSearchBox();
+        if (currentLevel > 1) this.createFoogleSearchBox(this.posts);
+        if (currentLevel === 3) this.createImageSearchBox();
 
         this.createLegendPanel();
         this.createColorNotes();
@@ -143,8 +154,18 @@ export class NewsFeed extends Scene {
             callbackScope: this,
             loop: true
         });
+
+        this.currentPostIndex = 0;
+        //console.log('Create(): currentPostIndex reset to', this.currentPostIndex);
+        this.activeContainers = 0;
+        //console.log("aaa active Containers: ", this.activeContainers);
+        this.gameOver = false;
+        this.score = 0;
         this.selectedPostContainer = null;
         this.selectedPost = null;
+        this.isSpawning = false;
+        this.destroyedContainers = new Set();
+
         this.feedbackText = this.add.text(640, 660, '', {
             fontSize: '24px',
             color: '#1976d2',
@@ -154,13 +175,13 @@ export class NewsFeed extends Scene {
             padding: { left: 16, right: 16, top: 8, bottom: 8 },
         }).setOrigin(0.5).setDepth(4);
         this.feedY = 275;
-        
+
         // Start post spawning
-        // Tạo postsContainer
         const checkLoadedEvent = this.time.addEvent({
             delay: 100, // mỗi 100ms kiểm tra 1 lần
             callback: () => {
-                if (this.imagesLoaded) {
+                if (this.imagesLoaded && !this.isSpawning) {
+                    //console.log('Images loaded, starting first spawn');
                     /* Khi đã load xong ảnh, bắt đầu spawn post
                     this.time.addEvent({
                         delay: 5000,
@@ -170,7 +191,7 @@ export class NewsFeed extends Scene {
                     });*/
 
                     this.activeContainers = 0;
-                    this.spawnNewPost(); // gọi lần đầu
+                    this.spawnNewPost(); // call first time
 
                     // Stop loop checking
                     checkLoadedEvent.remove(); // <- đây!
@@ -236,7 +257,7 @@ export class NewsFeed extends Scene {
         const keywords = posts
             .map(post => post.key)
             .filter(key => key !== undefined && key !== null && key !== '');
-        console.log('Keywords:', keywords);
+        //console.log('Keywords:', keywords);
 
         // Tạo text tạm để đo kích thước lớn nhất
         const tempTextObjects = keywords.map(word =>
@@ -306,14 +327,14 @@ export class NewsFeed extends Scene {
                 isExpanded = false;
                 dropdownItems.forEach(item => item.setVisible(false));
                 this.popupFoogleSearchingWindow(posts, word);
-                console.log('Chosen word:', word);
+                //console.log('Chosen word:', word);
             });
 
             dropdownItems.push(itemText);
         });
     }
 
-    private popupFoogleSearchingWindow(posts: any[], word: string){
+    private popupFoogleSearchingWindow(posts: any[], word: string) {
         if (!this.checkUsingPopup()) {
             this.foogleSearchText?.setText('Nach Stichwort suchen...').setColor('#888888').setFontStyle('italic');
             return;
@@ -327,7 +348,7 @@ export class NewsFeed extends Scene {
         const popupBg = this.add.rectangle(cardWidth + 268, cardHeight + 270, 430, 528, 0xffffff)
             .setStrokeStyle(3, 0x1976d2)
             .setDepth(100);
-        
+
         // find post with "key" = word
         const post = posts.find(post => post.key === word);
 
@@ -336,31 +357,33 @@ export class NewsFeed extends Scene {
             let popupText: Phaser.GameObjects.Text | null = null;
             if (post.contentFoogleSearch) {
                 popupText = this.add.text(cardWidth + 90, cardHeight + 40, post.contentFoogleSearch, {
-                fontSize: '20px',
-                color: '#000',
-                fontFamily: 'Roboto',
-                align: 'left',
-                wordWrap: { width: 364, useAdvancedWrap: true }
+                    fontSize: '20px',
+                    color: '#000',
+                    fontFamily: 'Roboto',
+                    align: 'left',
+                    wordWrap: { width: 364, useAdvancedWrap: true }
                 }).setOrigin(0).setDepth(101);
             } else {
                 popupText = this.add.text(cardWidth + 90, cardHeight + 40, 'Keine Informationen darüber!', {
-                fontSize: '20px',
-                color: '#000',
-                fontFamily: 'Roboto',
-                align: 'left',
-                wordWrap: { width: 364, useAdvancedWrap: true }
+                    fontSize: '20px',
+                    color: '#000',
+                    fontFamily: 'Roboto',
+                    align: 'left',
+                    wordWrap: { width: 364, useAdvancedWrap: true }
                 }).setOrigin(0).setDepth(101);
             }
 
+            const textureFoogleImgPrefix = `level${this.registry.get('currentLevel')}_`;
             let popupImage: Phaser.GameObjects.Image | null = null;
-            console.log("img in pop up ", post.imgWithFoogle);
+            //console.log("img in pop up ", post.imgWithFoogle);
             if (post.imgWithFoogle) {
-                popupImage = this.add.image(cardWidth + 240, cardHeight + 375, `foogleImg${post.id}`)
-                .setDisplaySize(300, 250)
-                .setDepth(101);
-                console.log("popup image: ", popupImage);
-                console.log("popup image: x = ", popupImage.x);
+                popupImage = this.add.image(cardWidth + 240, cardHeight + 375, `${textureFoogleImgPrefix}foogleImg${post.id}`)
+                    .setDisplaySize(300, 250)
+                    .setDepth(101);
+                //console.log("popup image: ", popupImage);
+                //console.log("popup image: x = ", popupImage.x);
             }
+
 
             // Exit button
             const exitButton = this.add.image(cardWidth + 470, cardHeight + 20, 'exitButton')
@@ -375,14 +398,14 @@ export class NewsFeed extends Scene {
                 this.foogleSearchIsUsing = false;
                 this.foogleSearchText?.setText('Nach Stichwort suchen...').setColor('#888888').setFontStyle('italic');
                 exitButton.destroy();
-                console.log('Button destroyed');
-            });       
+                //console.log('Button destroyed');
+            });
         } else {
             console.log(`Found nothing with key = "${word}"`);
         }
     }
 
-    private popupImageSearchingWindow(post: any, image?: Phaser.GameObjects.Image){
+    private popupImageSearchingWindow(post: any, image?: Phaser.GameObjects.Image) {
         if (!this.checkUsingPopup()) {
             this.imageText?.setText('Ziehe das Bild hierher...').setColor('#888888');
             return;
@@ -400,31 +423,33 @@ export class NewsFeed extends Scene {
         // Pop-up text
         let popupText: Phaser.GameObjects.Text | null = null;
         if (post.contentFoogleSearch) {
-                popupText = this.add.text(cardWidth + 90, cardHeight + 40, post.contentFoogleSearch, {
+            popupText = this.add.text(cardWidth + 90, cardHeight + 40, post.contentFoogleSearch, {
                 fontSize: '20px',
                 color: '#000',
                 fontFamily: 'Roboto',
                 align: 'left',
                 wordWrap: { width: 364, useAdvancedWrap: true }
-                }).setOrigin(0).setDepth(101);
+            }).setOrigin(0).setDepth(101);
         } else {
-                popupText = this.add.text(cardWidth + 90, cardHeight + 40, 'Keine Informationen darüber!', {
+            popupText = this.add.text(cardWidth + 90, cardHeight + 40, 'Keine Informationen darüber!', {
                 fontSize: '20px',
                 color: '#000',
                 fontFamily: 'Roboto',
                 align: 'left',
                 wordWrap: { width: 364, useAdvancedWrap: true }
-                }).setOrigin(0).setDepth(101);
+            }).setOrigin(0).setDepth(101);
         }
 
+
+        const textureFoogleImgPrefix = `level${this.registry.get('currentLevel')}_`;
         let popupImage: Phaser.GameObjects.Image | null = null;
-        console.log("img in pop up ", post.imgWithFoogle);
+        //console.log("img in pop up ", post.imgWithFoogle);
         if (post.imgWithFoogle) {
-                popupImage = this.add.image(cardWidth + 240, cardHeight + 375, `foogleImg${post.id}`)
+            popupImage = this.add.image(cardWidth + 240, cardHeight + 375, `${textureFoogleImgPrefix}foogleImg${post.id}`)
                 .setDisplaySize(300, 250)
                 .setDepth(101);
-                console.log("popup image: ", popupImage);
-                console.log("popup image: x = ", popupImage.x);
+            //console.log("popup image: ", popupImage);
+            //console.log("popup image: x = ", popupImage.x);
         }
 
         // Exit button
@@ -433,23 +458,25 @@ export class NewsFeed extends Scene {
             .setInteractive();
 
         exitButton.on('pointerdown', () => {
-                //console.log('Button exists before destroy:', exitButton.active);
-                popupBg.destroy();
-                if (popupText) popupText.destroy();
-                if (popupImage) popupImage.destroy();
-                this.imageSearchIsUsing = false;
-                this.imageText?.setText('Nach Stichwort suchen...').setColor('#888888');
-                exitButton.destroy();
-                console.log('Button destroyed');
-            });       
+            //console.log('Button exists before destroy:', exitButton.active);
+            popupBg.destroy();
+            if (popupText) popupText.destroy();
+            if (popupImage) popupImage.destroy();
+            this.imageSearchIsUsing = false;
+            this.imageText?.setText('Nach Stichwort suchen...').setColor('#888888');
+            exitButton.destroy();
+            //console.log('Button destroyed');
+        });
     }
 
     private showImagePopup(post: any) {
+        const textureImgPrefix = `level${this.registry.get('currentLevel')}_`;
         // Create background
         const bgPopup = this.add.rectangle(420, 400, 550, 458, 0x000000, 0.85).setOrigin(0.5);
         // Create image
-        const image = this.add.image(420, 400, `postImg${post.id}`).setOrigin(0.5).setDisplaySize(480, 400).setDepth(30);
+        const image = this.add.image(420, 400, `${textureImgPrefix}postImg${post.id}`).setOrigin(0.5).setDisplaySize(480, 400).setDepth(30);
         // save position
+
         image.setData('originalX', image.x);
         image.setData('originalY', image.y);
 
@@ -459,29 +486,29 @@ export class NewsFeed extends Scene {
         // Drag logic
         let igmaeDraggedClone: Phaser.GameObjects.Image | null = null;
         image.on('dragstart', (pointer: any) => {
-            console.log('Drag started for image!');
+            //console.log('Drag started for image!');
 
             // set position for clone
             const globalX = image!.getData('originalX');
             const globalY = image!.getData('originalY') - 20;
-            igmaeDraggedClone = this.add.image(globalX, globalY, `postImg${post.id}`).setOrigin(0).setDepth(100).setAlpha(0.8).setDisplaySize(360, 300);
+            igmaeDraggedClone = this.add.image(globalX, globalY, `${textureImgPrefix}postImg${post.id}`).setOrigin(0).setDepth(100).setAlpha(0.8).setDisplaySize(360, 300);
 
             igmaeDraggedClone.setInteractive({ draggable: true });
             this.input.setDraggable(igmaeDraggedClone);
 
             this.input.once('drag', (pointer: any, dragX: number, dragY: number) => {
                 if (igmaeDraggedClone) {
-                        igmaeDraggedClone.x = dragX;
-                        igmaeDraggedClone.y = dragY;
+                    igmaeDraggedClone.x = dragX;
+                    igmaeDraggedClone.y = dragY;
                 }
             });
 
             this.input.once('dragend', (pointer: any, dragX: number, dragY: number, dropped: boolean) => {
                 if (igmaeDraggedClone) {
-                        igmaeDraggedClone.setDepth(100).setAlpha(1).setScale(1);
+                    igmaeDraggedClone.setDepth(100).setAlpha(1).setScale(1);
 
                     if (!dropped) {
-                            igmaeDraggedClone.destroy();
+                        igmaeDraggedClone.destroy();
                     }
                 }
             });
@@ -489,10 +516,10 @@ export class NewsFeed extends Scene {
         // Drop zone logic
         this.input.on('drop', (pointer: any, gameObject: Phaser.GameObjects.Image, dropZone: any) => {
             if (gameObject === image && dropZone.getData('type') === 'reverse-image-search') {
-                    this.imageText?.setText('Checking ...').setColor('#1976d2');
+                this.imageText?.setText('Checking ...').setColor('#1976d2');
 
-                    this.time.delayedCall(1000, () => { // 1000ms = 1 s
-                        this.popupImageSearchingWindow(post, igmaeDraggedClone ?? undefined);
+                this.time.delayedCall(1000, () => { // 1000ms = 1 s
+                    this.popupImageSearchingWindow(post, igmaeDraggedClone ?? undefined);
                 });
             }
         });
@@ -510,14 +537,14 @@ export class NewsFeed extends Scene {
     }
 
     private checkUsingPopup(): boolean {
-        if(this.imageSearchIsUsing){
+        if (this.imageSearchIsUsing) {
             this.showFeedback('Schließe bitte zuerst das Fenster zur Bildersuche!', '#d32f2f');
             return false;
         };
-        if(this.foogleSearchIsUsing){
+        if (this.foogleSearchIsUsing) {
             this.showFeedback('Schließe bitte zuerst das Fenster zur Foogle - Suche!', '#d32f2f');
             return false;
-        } 
+        }
         return true;
     }
 
@@ -581,10 +608,10 @@ export class NewsFeed extends Scene {
         legendPanel.add([bg, ...chatBubbles]);
     }
 
-    private createColorNotes(){
+    private createColorNotes() {
         // Original coordinates
-        const baseX = 990; 
-        const baseY = 635; 
+        const baseX = 990;
+        const baseY = 635;
 
         const circleRadius = 13;
         const gapX = 75; // distance of circles
@@ -612,34 +639,48 @@ export class NewsFeed extends Scene {
     }
 
     private spawnNewPost() {
-        // Only spawn if fewer than maxPostsOnScreen posts are on screen
-        /*const activePosts = this.children.list.filter(obj =>
-            obj instanceof Phaser.GameObjects.Container
-        ).length;*/
+        // Prevent multiple simultaneous spawning
+        if (this.isSpawning) {
+            //console.log('Already spawning, skipping');
+            return;
+        }
         if (this.activeContainers > 0) {
+            //console.log('Active containers exist, skipping spawn');
             return;
         }
         if (!this.posts || this.posts.length === 0) {
             console.warn('No posts available to spawn');
             return;
         }
-        if(this.currentPostIndex >= this.posts.length) {
-            this.time.delayedCall(3000, () => { 
-                this.gameOver = true; 
-
-                if(this.registry.get('currentLevel') == 3) this.scene.start('GameOver', { score: this.score });
-                else {
-                    const nextLevel = this.registry.get('currentLevel') + 1;
-                    this.registry.set('currentLevel', nextLevel);
-                    this.scene.start('LevelCompleteScene', { score: this.score });
+        //console.log("aaaaa: currentPostIndex:  ", this.currentPostIndex);
+        if (this.currentPostIndex >= this.posts.length) {
+            console.log("All posts completed for this level");
+            this.time.delayedCall(3000, () => {
+                this.gameOver = true;
+                const currentFinalScore = this.registry.get('finalScore') || 0;
+                this.registry.set('finalScore', currentFinalScore + this.score);
+                if (this.registry.get('currentLevel') == 3) {
+                    this.isCreated = false;
+                    this.scene.start('GameOver');
                 }
-                this.scoreText.setText(`Score: ${this.score}`);
+                else {
+                    this.imagesLoaded = false;
+                    this.currentPostIndex = 0;
+                    this.isCreated = false;
+                    //console.log("reset at spawn method currentPostIndex: ",this.currentPostIndex);
+                    this.time.delayedCall(3000, () => {
+                        this.scene.start('LevelCompleteScene', { score: this.score });
+                    });
+                }
             });
+            return;
         }
 
+        // Set spawning flag
+        this.isSpawning = true;
         const containersToSpawn = Math.min(2, this.posts.length - this.currentPostIndex);
         const spawnedContainers = [];
-
+        console.log('containersToSpawn: ', containersToSpawn)
         for (let i = 0; i < containersToSpawn; i++) {
             const post = this.posts[this.currentPostIndex];
             const postContainer = this.createPostElement(post);
@@ -655,26 +696,30 @@ export class NewsFeed extends Scene {
             // Increase active containers 
             this.activeContainers++;
             spawnedContainers.push(postContainer);
-
             this.currentPostIndex++;
         }
 
+        // Clear spawning flag after containers are created
+        this.isSpawning = false;
+
+        // Destroy event
         // Destroy event
         spawnedContainers.forEach(container => {
             container.once('destroy', () => {
                 this.activeContainers--;
-                
-                // Spawn new containers 
+                //console.log('Container destroyed, activeContainers:', this.activeContainers);
+                // Spawn new containers when all are destroyed
                 if (this.activeContainers === 0) {
                     this.feedY = 275;
                     this.time.delayedCall(200, () => {
+                        console.log('destroy new post')
                         this.spawnNewPost();
                     });
                 }
             });
         });
     }
-    
+
     private createPostElement(
 
         post: {
@@ -686,7 +731,7 @@ export class NewsFeed extends Scene {
             imgWithFoogle?: string,
             category: string
         }): Phaser.GameObjects.Container {
-        console.log(post);
+        //console.log(post);
         // Smaller post card
 
         const cardWidth = 750;
@@ -709,7 +754,7 @@ export class NewsFeed extends Scene {
         const generatedDate = this.getRandomDate();
         const timestamp = generatedDate + ' • ' + (Math.floor(Math.random() * 23) + 1) + 'h ago';
         // Top row: avatar, username, timestamp (left), date (right)
-        const topRowY = -cardHeight/2 +25;
+        const topRowY = -cardHeight / 2 + 25;
         const avatar = this.add.image(-cardWidth / 2 + 32, topRowY, randomAvatarKey)
             .setDisplaySize(30, 30)
             .setOrigin(0, 0.5);
@@ -752,7 +797,7 @@ export class NewsFeed extends Scene {
             // Drag logic
             let draggedClone: Phaser.GameObjects.Text | null = null;
             source.on('dragstart', (pointer: any) => {
-                console.log('Drag started for source!');
+                //console.log('Drag started for source!');
 
                 // set position for clone
                 const globalX = source!.getData('originalX');
@@ -832,17 +877,19 @@ export class NewsFeed extends Scene {
         // Image
         let image: Phaser.GameObjects.Image | null = null;
         let seeImageText: Phaser.GameObjects.Text | null = null;
-        console.log('aaaa: ', post.img)
+        //console.log('aaaa: ', post.img)
         if (post.img) {
             if (!post.source) seeImageText = this.add.text(-cardWidth / 2 + 105, topRowY + content.height + 50, '👉 Bild ansehen', {
-                fontSize: '20px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'italic'})
+                fontSize: '20px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'italic'
+            })
                 .setOrigin(0.5).setInteractive().setDepth(16); //'#1976d2'
             else {
                 seeImageText = this.add.text(-cardWidth / 2 + 105, topRowY + content.height + 75, '👉 Bild ansehen', {
-                fontSize: '20px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'italic'})
-                .setOrigin(0.5).setInteractive().setDepth(16);
+                    fontSize: '20px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'italic'
+                })
+                    .setOrigin(0.5).setInteractive().setDepth(16);
             }
-            console.log("seeImageText: ", seeImageText);
+            //console.log("seeImageText: ", seeImageText);
             seeImageText.on('pointerdown', () => {
                 this.showImagePopup(post);
             });
@@ -875,7 +922,8 @@ export class NewsFeed extends Scene {
                         this.score += 10;
                         this.showFeedback('🕵️‍♂️ Toll! Du hast die Wahrheit herausgefunden.', '#388e3c');
                     } else {
-                        this.score -= 5;
+                        if (this.score < 5) this.score = 0;
+                        else this.score -= 5;
                         this.showFeedback('🤦 Hm... Das war leider falsch. Überprüfe nächstes Mal genauer!', '#d32f2f');
                     }
                 } else if (color === 0xe74c3c) {
@@ -883,7 +931,8 @@ export class NewsFeed extends Scene {
                         this.score += 10;
                         this.showFeedback('🕵️‍♂️ Toll! Du hast die Wahrheit herausgefunden.', '#388e3c');
                     } else {
-                        this.score -= 5;
+                        if (this.score < 5) this.score = 0;
+                        else this.score -= 5;
                         this.showFeedback('🤦 Hm... Das war leider falsch. Überprüfe nächstes Mal genauer!', '#d32f2f');
                     }
                 } else {
@@ -891,7 +940,8 @@ export class NewsFeed extends Scene {
                         this.score += 10;
                         this.showFeedback('🕵️‍♂️ Toll! Du hast die Wahrheit herausgefunden.', '#388e3c');
                     } else {
-                        this.score -= 5;
+                        if (this.score < 5) this.score = 0;
+                        else this.score -= 5;
                         this.showFeedback('🤦 Hm... Das war leider falsch. Überprüfe nächstes Mal genauer!', '#d32f2f');
                     }
                 }
@@ -914,7 +964,7 @@ export class NewsFeed extends Scene {
         (container as any).viralText = viralLabel;
         return container;
     }
-    
+
     private showFeedback(message: string, color: string) {
         this.feedbackText.setText(message);
         this.feedbackText.setColor(color);
@@ -941,30 +991,67 @@ export class NewsFeed extends Scene {
     update(time: number, delta: number) {
         // Each post's viral score increases so it reaches 100 in 90 seconds (1.11 per second)
         const viralIncrement = (100 / 90) * (delta / 1000); // delta is ms
+        let loser = false;
         let gameOver = false;
         this.children.list.forEach(obj => {
             if (obj instanceof Phaser.GameObjects.Container && (obj as any).isNewsPost === true) {
-                const post = this.posts[this.currentPostIndex];
-                if (post) {
-                    post.viralScore = Math.min(100, post.viralScore + viralIncrement);
+                console.log("currentIndex: ", this.currentPostIndex);
+                const post2 = this.posts[this.currentPostIndex - 1];
+                const post1 = this.posts[this.currentPostIndex - 2];
+                console.log("post1: ", post1);
+                console.log("post1.category is: ", post1.category);
+
+                console.log("post2: ", post2);
+                console.log("post2.category is: ", post2.category);
+                if (post2) {
+                    post2.viralScore = Math.min(100, post2.viralScore + viralIncrement);
                     // Update viral bar and text
                     const viralBar = (obj as any).viralBar as Phaser.GameObjects.Rectangle;
                     const viralText = (obj as any).viralText as Phaser.GameObjects.Text;
                     if (viralBar && viralText) {
-                        viralBar.width = 2 * post.viralScore;
-                        viralText.setText(`Viral: ${Math.round(post.viralScore)}%`);
+                        viralBar.width = 2 * post2.viralScore;
+                        viralText.setText(`Viral: ${Math.round(post2.viralScore)}%`);
                     }
                     // If fake news and viralScore hits 100, game over
-                    console.log("current post index = ",this.currentPostIndex);
-                    if (post.category === "fake" && post.viralScore >= 100) {
-                        this.time.delayedCall(3000, () => { gameOver = true; });
+                    console.log("oh no: ", this.currentPostIndex);
+                    if (post2.category === "fake" && post2.viralScore >= 100) {
+                        console.log("post is fake, viral 100%");
+                        gameOver = true; loser = true;
+                    }
+                }
+                if (post1) {
+                    post1.viralScore = Math.min(100, post1.viralScore + viralIncrement);
+                    // Update viral bar and text
+                    const viralBar = (obj as any).viralBar as Phaser.GameObjects.Rectangle;
+                    const viralText = (obj as any).viralText as Phaser.GameObjects.Text;
+                    if (viralBar && viralText) {
+                        viralBar.width = 2 * post1.viralScore;
+                        viralText.setText(`Viral: ${Math.round(post1.viralScore)}%`);
+                    }
+                    // If fake news and viralScore hits 100, game over
+                    console.log("oh no: ", this.currentPostIndex);
+                    if (post1.category === "fake" && post1.viralScore >= 100) {
+                        console.log("post is fake, viral 100%");
+                        gameOver = true; loser = true;
                     }
                 }
             }
         });
         if (gameOver) {
-            if(this.registry.get('currentLevel') == 3) this.scene.start('GameOver', { score: this.score });
-            else this.scene.start('LevelCompleteScene', { score: this.score });
+            const currentFinalScore = this.registry.get('finalScore') || 0;
+            this.registry.set('finalScore', currentFinalScore + this.score);
+            if (this.registry.get('currentLevel') == 3 || loser) {
+                this.isCreated = false;
+                this.scene.start('GameOver');
+            }
+            else {
+                this.imagesLoaded = false;
+                this.currentPostIndex = 0;
+                this.isCreated = false;
+                //console.log("reset at update method currentPostIndex: ",this.currentPostIndex);
+                this.scene.start('LevelCompleteScene', { score: this.score });
+
+            }
         }
         this.scoreText.setText(`Score: ${this.score}`);
     }

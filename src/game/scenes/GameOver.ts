@@ -21,7 +21,7 @@ export class GameOver extends Scene {
     create() {
         // Add background
         this.add.image(640, 360, 'bgEndGame').setDisplaySize(1280, 720);
-        // Add game over text
+
         const gameOverText = this.add.text(640, 270, 'Game Over', {
             fontFamily: 'Roboto',
             fontSize: '64px',
@@ -29,32 +29,20 @@ export class GameOver extends Scene {
         }).setOrigin(0.5);
 
         // Add final score
-        const scoreText = this.add.text(640, 330, `Final Score: ${this.score}`, {
+        const scoreText = this.add.text(640, 330, `Final Score: ${this.registry.get('finalScore')}`, {
             fontFamily: 'Roboto',
             fontSize: '48px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        // Add replay button
-        const replayButton = this.add.image(550, 420, 'playAgainButton')
-        .setDisplaySize(80,80).setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-            this.scene.start('NewsFeed');
-        })
-        .on('pointerover', () => {
-            replayButton.setScale(0.45);
-        })
-        .on('pointerout', () => {
-            replayButton.setScale(0.35);
-        });
-
         // Add home button
-        const homeButton = this.add.image(730, 420, 'homeButton')
+        const homeButton = this.add.image(640, 420, 'homeButton')
         .setDisplaySize(80,80).setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.scene.start('MainMenu');
+            //this.scene.start('MainMenu');
+            //this.registry.set('currentLevel', 1);
+            window.location.reload();
         })
         .on('pointerover', () => {
             homeButton.setScale(0.45);
