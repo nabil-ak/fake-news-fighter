@@ -8,7 +8,6 @@ export class GameOver extends Scene {
     }
 
     preload() {
-        this.load.image('bgEndGame', 'assets/background/bgEndGame.jpg');
         this.load.image('playAgainButton', 'assets/button/playAgainButton.png');
         this.load.image('homeButton', 'assets/button/homeButton.png');
         //this.load.image('nonameButton2', 'assets/button/nonameButton2.png');
