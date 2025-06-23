@@ -1,38 +1,50 @@
 import { Scene } from 'phaser';
+
 export class LevelCompleteScene extends Scene {
+  
   constructor() {
     super({ key: 'LevelCompleteScene' });
   }
 
-  create(): void {
-    // Dark transparent background overlay
-    this.add.rectangle(0, 0, 1280, 720, 0x000000, 0.5).setOrigin(0);
+  preload(){
+    // Load button
+    this.load.image('homebutton', 'assets/button/homeButton.png');
+    this.load.image('nextButton', 'assets/button/nextButton.png');
+    this.load.image('playAgainButton', 'assets/button/playAgainButton.png');
+    this.load.image('star', 'assets/star.png');
+  }
+
+  create(){
+    // Add background
+    this.add.rectangle(0, 0, 1280, 720, 0xcfd8dc).setOrigin(0);
 
     // Card panel for the result
-    this.add.rectangle(640, 360, 400, 300, 0xffffff, 1)
+    this.add.rectangle(640, 360, 480, 480, 0xffffff, 1)
         .setOrigin(0.5)
         .setStrokeStyle(4, 0x000000);
 
     // Add title
-    this.add.text(1280, 650, 'Level Complete!', {
-      fontSize: '32px',
+    this.add.text(640, 200, 'LEVEL GESCHAFFT!', {
+      fontSize: '40px',
       color: '#222',
       fontFamily: 'Roboto',
     }).setOrigin(0.5);
 
-    // Add continue button
-    const continueButton = this.add.text(640, 420, 'Tiếp tục', {
-      fontSize: '28px',
-      color: '#007bff',
-      fontFamily: 'Roboto',
-      backgroundColor: '#ddd',
-      padding: { x: 10, y: 5 },
-    }).setOrigin(0.5).setInteractive();
+    // Add home button 
+    const homeButton = this.add.image(490, 520, 'homebutton')
+      .setDisplaySize(80, 80).setOrigin(0.5).setDepth(101)
+      .setInteractive();
 
-    continueButton.on('pointerup', () => {
-      this.scene.stop('LevelCompleteScene');
-      this.scene.stop('NewsFeed'); 
-      this.scene.start('NextLevel'); 
-    });
+    homeButton.on('pointerdown', () => {
+            this.scene.start('MainMenu');
+            this.registry.set('currentLevel', 1);
+            //score
+        })
+        .on('pointerover', () => {
+            homeButton.setScale(0.45);
+        })
+        .on('pointerout', () => {
+            homeButton.setScale(0.375);
+        });
   }
 }
