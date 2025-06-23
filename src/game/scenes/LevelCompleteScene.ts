@@ -44,15 +44,15 @@ export class LevelCompleteScene extends Scene {
     const score = data.score ?? 0;
     const time = data.time ?? 0;
     this.add.text(640, 340, `Score: ${score}`,
-      { fontSize: '28px', color: '#222', fontFamily: 'Roboto' })
+      { fontSize: '32px', color: '#222', fontFamily: 'Roboto' })
       .setOrigin(0.5);
     this.add.text(640, 380, `Time: ${time} s`,
-      { fontSize: '28px', color: '#222', fontFamily: 'Roboto' })
+      { fontSize: '32px', color: '#222', fontFamily: 'Roboto' })
       .setOrigin(0.5);
 
     // Button positions
     const buttonY = 520;
-    const buttonSpacing = 180;
+    const buttonSpacing = 140;
     const currentLevel = this.registry.get('currentLevel') || 1;
     const maxLevel = 3;
 
