@@ -4,6 +4,7 @@ import { NewsFeed } from './scenes/NewsFeed';
 import { LevelCompleteScene } from './scenes/LevelCompleteScene';
 import { GameOver } from './scenes/GameOver';
 import { AUTO, Game, Types } from 'phaser';
+import { IntroScene } from './scenes/IntroScene';
 
 // Find out more information about the Game Config at:
 // https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
@@ -30,6 +31,7 @@ const config: Types.Core.GameConfig = {
 
     scene: [
         MainMenu,
+        IntroScene,
         LevelRequirement,
         LevelCompleteScene,
         NewsFeed,

@@ -1,38 +1,96 @@
 import { Scene } from 'phaser';
+
 export class LevelCompleteScene extends Scene {
+  
   constructor() {
     super({ key: 'LevelCompleteScene' });
   }
 
-  create(): void {
-    // Dark transparent background overlay
-    this.add.rectangle(0, 0, 1280, 720, 0x000000, 0.5).setOrigin(0);
+  preload(){
+    // Load button
+    this.load.image('homebutton', 'assets/button/homeButton.png');
+    this.load.image('nextButton', 'assets/button/nextButton.png');
+    this.load.image('playAgainButton', 'assets/button/playAgainButton.png');
+    this.load.image('star', 'assets/star.png');
+  }
+
+  create(data: { score?: number; time?: number } = {}){
+    // Add background
+    this.add.rectangle(0, 0, 1280, 720, 0xcfd8dc).setOrigin(0);
 
     // Card panel for the result
-    this.add.rectangle(640, 360, 400, 300, 0xffffff, 1)
+    this.add.rectangle(640, 360, 480, 480, 0xffffff, 1)
         .setOrigin(0.5)
         .setStrokeStyle(4, 0x000000);
 
     // Add title
-    this.add.text(1280, 650, 'Level Complete!', {
-      fontSize: '32px',
+    this.add.text(640, 170, 'LEVEL COMPLETE!', {
+      fontSize: '40px',
       color: '#222',
       fontFamily: 'Roboto',
     }).setOrigin(0.5);
 
-    // Add continue button
-    const continueButton = this.add.text(640, 420, 'Tiếp tục', {
-      fontSize: '28px',
-      color: '#007bff',
-      fontFamily: 'Roboto',
-      backgroundColor: '#ddd',
-      padding: { x: 10, y: 5 },
-    }).setOrigin(0.5).setInteractive();
+    // Add 3 yellow stars
+    const starY = 260;
+    const starSpacing = 120;
+    for (let i = 0; i < 3; i++) {
+      this.add.image(640 + (i - 1) * starSpacing, starY, 'star')
+        .setDisplaySize(100, 100)
+        .setOrigin(0.5)
+        .setTint(0xFFFF00);
+    }
 
-    continueButton.on('pointerup', () => {
-      this.scene.stop('LevelCompleteScene');
-      this.scene.stop('NewsFeed'); 
-      this.scene.start('NextLevel'); 
-    });
+    // Show score and time
+    const score = data.score ?? 0;
+    const time = data.time ?? 0;
+    this.add.text(640, 340, `Score: ${score}`,
+      { fontSize: '28px', color: '#222', fontFamily: 'Roboto' })
+      .setOrigin(0.5);
+    this.add.text(640, 380, `Time: ${time} s`,
+      { fontSize: '28px', color: '#222', fontFamily: 'Roboto' })
+      .setOrigin(0.5);
+
+    // Button positions
+    const buttonY = 520;
+    const buttonSpacing = 180;
+    const currentLevel = this.registry.get('currentLevel') || 1;
+    const maxLevel = 3;
+
+    // Home button
+    const homeButton = this.add.image(640 - buttonSpacing, buttonY, 'homebutton')
+      .setDisplaySize(80, 80).setOrigin(0.5).setDepth(101)
+      .setInteractive({ useHandCursor: true });
+    homeButton.on('pointerdown', () => {
+      this.registry.set('currentLevel', 1);
+      this.scene.start('MainMenu');
+    })
+    .on('pointerover', () => { homeButton.setScale(0.45); })
+    .on('pointerout', () => { homeButton.setScale(0.375); });
+
+    // Repeat button
+    const repeatButton = this.add.image(640, buttonY, 'playAgainButton')
+      .setDisplaySize(80, 80).setOrigin(0.5).setDepth(101)
+      .setInteractive({ useHandCursor: true });
+    repeatButton.on('pointerdown', () => {
+      // Restart current level
+      this.scene.start('LevelRequirement');
+    })
+    .on('pointerover', () => { repeatButton.setScale(0.45); })
+    .on('pointerout', () => { repeatButton.setScale(0.375); });
+
+    // Next button (only if not last level)
+    const nextButton = this.add.image(640 + buttonSpacing, buttonY, 'nextButton')
+      .setDisplaySize(80, 80).setOrigin(0.5).setDepth(101)
+      .setInteractive({ useHandCursor: true });
+    nextButton.on('pointerdown', () => {
+      if (currentLevel <= maxLevel) {
+        this.scene.start('LevelRequirement');
+      } else {
+        // If last level, go to MainMenu or show a message
+        this.scene.start('MainMenu');
+      }
+    })
+    .on('pointerover', () => { nextButton.setScale(0.45); })
+    .on('pointerout', () => { nextButton.setScale(0.375); });
   }
 }
