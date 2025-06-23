@@ -9,7 +9,7 @@ export type LevelData = {
 const levels: LevelData[] = [
     {
         "levelID": 1,
-        "requirements": "- Verwende den Link-Checker, um den Link im Beitrag zu überprüfen.\n- Ist er grün? Nicht sofort vertrauen - klicke drauf und überprüfe die Seite.\n- Markiere den Beitrag als fake    , echt     oder irrelevant    .\n*Achtung:\nEin Klick auf einen gefährlichen Link = Game Over!\nFalsche Einordnung = Punktabzug!",
+        "requirements": "- Verwende den Link-Checker, um den Link im Beitrag zu überprüfen.\n- Ist er grün? Nicht sofort vertrauen - klicke drauf und überprüfe die Seite.\n- Markiere den Beitrag als fake, echt oder irrelevant.\n*Achtung:\nEin Klick auf einen gefährlichen Link = Game Over!\nFalsche Einordnung = Punktabzug!",
         "postSetId": "set1"
     },
     {
