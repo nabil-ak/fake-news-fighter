@@ -83,7 +83,7 @@ export class LevelCompleteScene extends Scene {
       .setDisplaySize(80, 80).setOrigin(0.5).setDepth(101)
       .setInteractive({ useHandCursor: true });
     nextButton.on('pointerdown', () => {
-      if (currentLevel < maxLevel) {
+      if (currentLevel <= maxLevel) {
         this.scene.start('LevelRequirement');
       } else {
         // If last level, go to MainMenu or show a message

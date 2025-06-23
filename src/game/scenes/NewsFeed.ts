@@ -669,6 +669,7 @@ export class NewsFeed extends Scene {
                     this.isCreated = false;
                     //console.log("reset at spawn method currentPostIndex: ",this.currentPostIndex);
                     this.time.delayedCall(3000, () => {
+                        this.registry.set('currentLevel', this.registry.get('currentLevel') + 1);
                         this.scene.start('LevelCompleteScene', { score: this.score });
                     });
                 }
