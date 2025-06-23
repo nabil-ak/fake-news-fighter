@@ -60,7 +60,7 @@ export class NewsFeed extends Scene {
         }
         this.load.image('exitButton', 'assets/button/exitButton.png');
         // Load json Data
-        this.load.json('postsData', 'src/data/posts.json');
+        this.load.json('postsData', 'data/posts.json');
         console.log('this.cache.json.get: ',this.cache.json.get('postsData'))
         //Load avatars
         this.avatarKeys.forEach((key) => {
