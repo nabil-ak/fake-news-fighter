@@ -14,7 +14,7 @@ interface Post {
 export class NewsFeed extends Scene {
     private imagesLoaded = false;
     private score: number = 0;
-    private timeRemaining: number = 300; // 5 minutes in seconds
+    private timeRemaining: number = 600; // 5 minutes in seconds
     private scoreText!: Phaser.GameObjects.Text;
     private timeText!: Phaser.GameObjects.Text;
     private selectedPostContainer: Phaser.GameObjects.Container | null = null;
@@ -32,14 +32,20 @@ export class NewsFeed extends Scene {
     private imageText?: Phaser.GameObjects.Text;
     private imageDropZone!: Phaser.GameObjects.Zone;
 
-    private feedY: number = 240;
+    private foogleSearchText?: Phaser.GameObjects.Text;
+    private foogleSearchIsUsing: boolean = false;
+    private imageSearchIsUsing: boolean = false;
+
+    private feedY: number = 275;
     private postsData: any;
     private posts: any[];
     private avatarKeys = Array.from({ length: 10 }, (_, i) => `profil${i + 1}`);
     private usernames: string[] = [
         'FactFinder', 'NewsNinja', 'MemeQueen', 'TrollHunter', 'InfoGuru', 'SatireSam', 'ViralVicky', 'TruthSeeker', 'ClickbaitCarl', 'DebunkDaisy'
     ];
-    private maxPostsOnScreen: number = 5;
+    
+    private activeContainers : number = 0;
+    private gameOver: boolean = false;
 
     constructor() {
         super({ key: 'NewsFeed' });
@@ -128,7 +134,7 @@ export class NewsFeed extends Scene {
         this.createImageSearchBox();
 
         this.createLegendPanel();
-
+        this.createColorNotes();
 
         // Start the game timer
         this.time.addEvent({
@@ -147,25 +153,26 @@ export class NewsFeed extends Scene {
             align: 'center',
             padding: { left: 16, right: 16, top: 8, bottom: 8 },
         }).setOrigin(0.5).setDepth(4);
-        this.feedY = 240;
-        // Start post spawning
-        // ✅ Tạo postsContainer
+        this.feedY = 275;
         
+        // Start post spawning
+        // Tạo postsContainer
         const checkLoadedEvent = this.time.addEvent({
             delay: 100, // mỗi 100ms kiểm tra 1 lần
             callback: () => {
                 if (this.imagesLoaded) {
-                    // Khi đã load xong ảnh, bắt đầu spawn post
+                    /* Khi đã load xong ảnh, bắt đầu spawn post
                     this.time.addEvent({
                         delay: 5000,
                         callback: this.spawnNewPost,
                         callbackScope: this,
                         loop: true
-                    });
+                    });*/
 
+                    this.activeContainers = 0;
                     this.spawnNewPost(); // gọi lần đầu
 
-                    // 🛑 Dừng vòng lặp kiểm tra
+                    // Stop loop checking
                     checkLoadedEvent.remove(); // <- đây!
                 }
             },
@@ -183,41 +190,12 @@ export class NewsFeed extends Scene {
             fontStyle: 'bold',
             fontFamily: 'Roboto'
         }).setOrigin(1, 0);
-        this.timeText = this.add.text(1230, 85, 'Time: 05:00', {
+        this.timeText = this.add.text(1230, 85, 'Time: 10:00', {
             fontSize: '24px',
             color: '#222',
             fontFamily: 'Roboto'
         }).setOrigin(1, 0);
     }
-
-    /*    private createToolPanel() {
-            const toolPanel = this.add.container(150, 50);
-            // Check Source button
-            const checkSource = this.add.text(350, 0, 'Foogle - Suche', {
-                fontFamily: 'Roboto',
-                fontSize: '24px',
-                color: '#1976d2',
-            }).setOrigin(0.5);
-            const checkSourceBox = this.add.text(525, 95, 'Suche mehr Infos ...', {
-                fontSize: '20px',
-                color: '#888888',
-                fontFamily: 'Roboto',
-                fontStyle: 'italic',
-                backgroundColor: '#ffffff',
-                padding: { left: 16, right: 16, top: 8, bottom: 8 },
-            })
-                .setOrigin(0.5)
-                .setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => {
-                    checkSourceBox.setStyle({ backgroundColor: '#bbdefb' });
-                    //this.useTool('check-source');
-                })
-                .on('pointerup', () => {
-                    checkSourceBox.setStyle({ backgroundColor: '#e3eafc' });
-                });
-           
-            toolPanel.add([ checkImage, checkSource]);
-        }*/
 
     private createLinkCheckerBox() {
         const boxWidth = 280;
@@ -286,7 +264,7 @@ export class NewsFeed extends Scene {
             .setInteractive({ useHandCursor: true });
 
         // Text in Box
-        const selectedText = this.add.text(boxX, boxY, 'Nach Stichwort suchen...', {
+        this.foogleSearchText = this.add.text(boxX, boxY, 'Nach Stichwort suchen...', {
             fontSize: '20px',
             color: '#888888',
             fontFamily: 'Roboto',
@@ -318,16 +296,16 @@ export class NewsFeed extends Scene {
                 backgroundColor: '#eeeeee',
                 padding: { x: 10, y: 5 }
             })
-                .setOrigin(0.5).setDepth(159)
+                .setOrigin(0.5).setDepth(150)
                 .setInteractive({ useHandCursor: true })
                 .setVisible(false);
 
             itemText.on('pointerdown', () => {
-                selectedText.setText(word);
-                selectedText.setColor('#1976d2').setStroke('#1976d2', 1.15);
+                this.foogleSearchText?.setText(word);
+                this.foogleSearchText?.setColor('#1976d2').setFontStyle('bold');
                 isExpanded = false;
                 dropdownItems.forEach(item => item.setVisible(false));
-                this.popupSearchingWindow(posts, word);
+                this.popupFoogleSearchingWindow(posts, word);
                 console.log('Chosen word:', word);
             });
 
@@ -335,11 +313,18 @@ export class NewsFeed extends Scene {
         });
     }
 
-    popupSearchingWindow(posts: any[], word: string){
+    private popupFoogleSearchingWindow(posts: any[], word: string){
+        if (!this.checkUsingPopup()) {
+            this.foogleSearchText?.setText('Nach Stichwort suchen...').setColor('#888888').setFontStyle('italic');
+            return;
+        }
+
+        this.foogleSearchIsUsing = true;
+
         // Pop-up background
         const cardWidth = 750;
         const cardHeight = 150;
-        const popupBg = this.add.rectangle(cardWidth + 275, cardHeight + 240, 400, 450, 0xffffff)
+        const popupBg = this.add.rectangle(cardWidth + 268, cardHeight + 270, 430, 528, 0xffffff)
             .setStrokeStyle(3, 0x1976d2)
             .setDepth(100);
         
@@ -350,27 +335,28 @@ export class NewsFeed extends Scene {
             // Pop-up text
             let popupText: Phaser.GameObjects.Text | null = null;
             if (post.contentFoogleSearch) {
-                popupText = this.add.text(cardWidth + 110, cardHeight + 50, post.contentFoogleSearch, {
+                popupText = this.add.text(cardWidth + 90, cardHeight + 40, post.contentFoogleSearch, {
                 fontSize: '20px',
                 color: '#000',
                 fontFamily: 'Roboto',
                 align: 'left',
-                wordWrap: { width: 350, useAdvancedWrap: true }
+                wordWrap: { width: 364, useAdvancedWrap: true }
                 }).setOrigin(0).setDepth(101);
             } else {
-                popupText = this.add.text(cardWidth + 110, cardHeight + 50, 'Keine Informationen darüber', {
+                popupText = this.add.text(cardWidth + 90, cardHeight + 40, 'Keine Informationen darüber!', {
                 fontSize: '20px',
                 color: '#000',
                 fontFamily: 'Roboto',
-                align: 'left'
+                align: 'left',
+                wordWrap: { width: 364, useAdvancedWrap: true }
                 }).setOrigin(0).setDepth(101);
             }
 
             let popupImage: Phaser.GameObjects.Image | null = null;
             console.log("img in pop up ", post.imgWithFoogle);
             if (post.imgWithFoogle) {
-                popupImage = this.add.image(cardWidth + 250, cardHeight + 300, `foogleImg${post.id}`)
-                .setDisplaySize(275, 275)
+                popupImage = this.add.image(cardWidth + 240, cardHeight + 375, `foogleImg${post.id}`)
+                .setDisplaySize(300, 250)
                 .setDepth(101);
                 console.log("popup image: ", popupImage);
                 console.log("popup image: x = ", popupImage.x);
@@ -386,50 +372,154 @@ export class NewsFeed extends Scene {
                 popupBg.destroy();
                 if (popupText) popupText.destroy();
                 if (popupImage) popupImage.destroy();
+                this.foogleSearchIsUsing = false;
+                this.foogleSearchText?.setText('Nach Stichwort suchen...').setColor('#888888').setFontStyle('italic');
                 exitButton.destroy();
                 console.log('Button destroyed');
-                this.time.delayedCall(1000, () => {
-                    if (this.imageText && this.imageText.active) {
-                        this.imageText.setText('Ziehe das Bild hierher ...').setColor('#888888');
-                        console.log('Text updated successfully');
-                    } else {
-                        console.error('imageText is null, undefined, or destroyed');
-                    }
-                });
             });       
         } else {
             console.log(`Found nothing with key = "${word}"`);
         }
-         
     }
 
+    private popupImageSearchingWindow(post: any, image?: Phaser.GameObjects.Image){
+        if (!this.checkUsingPopup()) {
+            this.imageText?.setText('Ziehe das Bild hierher...').setColor('#888888');
+            return;
+        }
 
-    // private createFoogleSearchBox(posts:any[]) {
-    //     const boxWidth = 280;
-    //     const boxHeight = 50;
-    //     const boxX = 550;
-    //     const boxY = 100;
+        this.imageSearchIsUsing = true;
 
-    //     // Create drop zone 
-    //     const foogleSearch = this.add.text(boxX - 60, boxY - 48, 'Foogle - Suche', {
-    //         fontFamily: 'Roboto',
-    //         fontSize: '24px',
-    //         color: '#1976d2',
-    //     }).setOrigin(0.5);
-    //     // Background for textBox
-    //     this.foogleSearchBox = this.add.rectangle(boxX, boxY, boxWidth, boxHeight, 0xffffff)
-    //         .setStrokeStyle(3, 0x1976d2)
-    //         .setAlpha(0.8);
+        // Pop-up background
+        const cardWidth = 750;
+        const cardHeight = 150;
+        const popupBg = this.add.rectangle(cardWidth + 268, cardHeight + 270, 430, 528, 0xffffff)
+            .setStrokeStyle(3, 0x1976d2)
+            .setDepth(100);
 
-    //     // Text in box
-    //     this.foogleSearchText = this.add.text(boxX + 10, boxY, 'Nach Stichwort suchen...', {
-    //         fontSize: '20px',
-    //         color: '#888888',
-    //         fontFamily: 'Roboto',
-    //         fontStyle: 'italic',
-    //         align: 'left'
-    //     }).setOrigin(0.5);
-    // }
+        // Pop-up text
+        let popupText: Phaser.GameObjects.Text | null = null;
+        if (post.contentFoogleSearch) {
+                popupText = this.add.text(cardWidth + 90, cardHeight + 40, post.contentFoogleSearch, {
+                fontSize: '20px',
+                color: '#000',
+                fontFamily: 'Roboto',
+                align: 'left',
+                wordWrap: { width: 364, useAdvancedWrap: true }
+                }).setOrigin(0).setDepth(101);
+        } else {
+                popupText = this.add.text(cardWidth + 90, cardHeight + 40, 'Keine Informationen darüber!', {
+                fontSize: '20px',
+                color: '#000',
+                fontFamily: 'Roboto',
+                align: 'left',
+                wordWrap: { width: 364, useAdvancedWrap: true }
+                }).setOrigin(0).setDepth(101);
+        }
+
+        let popupImage: Phaser.GameObjects.Image | null = null;
+        console.log("img in pop up ", post.imgWithFoogle);
+        if (post.imgWithFoogle) {
+                popupImage = this.add.image(cardWidth + 240, cardHeight + 375, `foogleImg${post.id}`)
+                .setDisplaySize(300, 250)
+                .setDepth(101);
+                console.log("popup image: ", popupImage);
+                console.log("popup image: x = ", popupImage.x);
+        }
+
+        // Exit button
+        const exitButton = this.add.image(cardWidth + 470, cardHeight + 20, 'exitButton')
+            .setDisplaySize(50, 50).setOrigin(0.5).setDepth(101)
+            .setInteractive();
+
+        exitButton.on('pointerdown', () => {
+                //console.log('Button exists before destroy:', exitButton.active);
+                popupBg.destroy();
+                if (popupText) popupText.destroy();
+                if (popupImage) popupImage.destroy();
+                this.imageSearchIsUsing = false;
+                this.imageText?.setText('Nach Stichwort suchen...').setColor('#888888');
+                exitButton.destroy();
+                console.log('Button destroyed');
+            });       
+    }
+
+    private showImagePopup(post: any) {
+        // Create background
+        const bgPopup = this.add.rectangle(420, 400, 550, 458, 0x000000, 0.85).setOrigin(0.5);
+        // Create image
+        const image = this.add.image(420, 400, `postImg${post.id}`).setOrigin(0.5).setDisplaySize(480, 400).setDepth(30);
+        // save position
+        image.setData('originalX', image.x);
+        image.setData('originalY', image.y);
+
+        image.setInteractive({ draggable: true });
+        this.input.setDraggable(image);
+
+        // Drag logic
+        let igmaeDraggedClone: Phaser.GameObjects.Image | null = null;
+        image.on('dragstart', (pointer: any) => {
+            console.log('Drag started for image!');
+
+            // set position for clone
+            const globalX = image!.getData('originalX');
+            const globalY = image!.getData('originalY') - 20;
+            igmaeDraggedClone = this.add.image(globalX, globalY, `postImg${post.id}`).setOrigin(0).setDepth(100).setAlpha(0.8).setDisplaySize(360, 300);
+
+            igmaeDraggedClone.setInteractive({ draggable: true });
+            this.input.setDraggable(igmaeDraggedClone);
+
+            this.input.once('drag', (pointer: any, dragX: number, dragY: number) => {
+                if (igmaeDraggedClone) {
+                        igmaeDraggedClone.x = dragX;
+                        igmaeDraggedClone.y = dragY;
+                }
+            });
+
+            this.input.once('dragend', (pointer: any, dragX: number, dragY: number, dropped: boolean) => {
+                if (igmaeDraggedClone) {
+                        igmaeDraggedClone.setDepth(100).setAlpha(1).setScale(1);
+
+                    if (!dropped) {
+                            igmaeDraggedClone.destroy();
+                    }
+                }
+            });
+        });
+        // Drop zone logic
+        this.input.on('drop', (pointer: any, gameObject: Phaser.GameObjects.Image, dropZone: any) => {
+            if (gameObject === image && dropZone.getData('type') === 'reverse-image-search') {
+                    this.imageText?.setText('Checking ...').setColor('#1976d2');
+
+                    this.time.delayedCall(1000, () => { // 1000ms = 1 s
+                        this.popupImageSearchingWindow(post, igmaeDraggedClone ?? undefined);
+                });
+            }
+        });
+        // Add exit button (ví dụ chữ 'X')
+        const closeText = this.add.text(662, 175, '✖', {
+            fontSize: '32px',
+            color: '#ffffff'
+        }).setDepth(51).setInteractive({ useHandCursor: true });
+
+        closeText.on('pointerdown', () => {
+            image.destroy();
+            bgPopup.destroy();
+            closeText.destroy();
+        });
+    }
+
+    private checkUsingPopup(): boolean {
+        if(this.imageSearchIsUsing){
+            this.showFeedback('Schließe bitte zuerst das Fenster zur Bildersuche!', '#d32f2f');
+            return false;
+        };
+        if(this.foogleSearchIsUsing){
+            this.showFeedback('Schließe bitte zuerst das Fenster zur Foogle - Suche!', '#d32f2f');
+            return false;
+        } 
+        return true;
+    }
 
     private createImageSearchBox() {
         const boxWidth = 280;
@@ -462,57 +552,127 @@ export class NewsFeed extends Scene {
     }
 
     private createLegendPanel() {
-        const legendPanel = this.add.container(1065, 350);
-        const bg = this.add.rectangle(0, 0, 320, 390, 0xffffff)
+        const legendPanel = this.add.container(1065, 380);
+        const bg = this.add.rectangle(0, 0, 320, 450, 0xffffff)
             .setOrigin(0.5)
             .setStrokeStyle(2, 0x1976d2)
             .setAlpha(0.98);
         // Chat bubbles / tips
         const chatBubbles = [
-            this.add.text(-130, -140, '💬 Hey, need a tip? Use the tools below to research!', {
+            this.add.text(-130, -185, '🔥 Lass Fake News nicht viral gehen!', {
                 fontSize: '18px', color: '#1976d2', fontFamily: 'Roboto', wordWrap: { width: 270 }
             }),
-            this.add.text(-130, -70, '😏 Remember: If it sounds too wild, it probably is.', {
+            this.add.text(-130, -125, '😏 Grün beim Link-Checker heißt nicht automatisch echt - klick und prüfe selbst.', {
+                fontSize: '18px', color: '#008800', fontFamily: 'Roboto', wordWrap: { width: 270 }
+            }),
+            this.add.text(-130, -45, '💬 Kein Link? Nutze die Foogle-Suche!', {
+                fontSize: '18px', color: '#FF3333', fontFamily: 'Roboto', wordWrap: { width: 270 }
+            }),
+            this.add.text(-130, 15, '🧐 Bild dabei? Nutze die Reverse Image Suche!', {
+                fontSize: '18px', color: '#3366CC', fontFamily: 'Roboto', wordWrap: { width: 270 }
+            }),
+            this.add.text(-130, 75, '💬 Vorsicht: Gefährlicher Link = Game Over', {
                 fontSize: '18px', color: '#222', fontFamily: 'Roboto', wordWrap: { width: 270 }
             }),
-            this.add.text(-130, 0, '😂 Some posts are just memes in disguise.', {
-                fontSize: '18px', color: '#888', fontFamily: 'Roboto', wordWrap: { width: 270 }
-            }),
-            this.add.text(-130, 70, '🧐 Double-check the source, always!', {
-                fontSize: '18px', color: '#1976d2', fontFamily: 'Roboto', wordWrap: { width: 270 }
-            }),
-            this.add.text(-130, 140, '🔥 Don\'t let fake news go viral!', {
-                fontSize: '18px', color: '#d32f2f', fontFamily: 'Roboto', wordWrap: { width: 270 }
+            this.add.text(-130, 135, '😂 Manche Posts sind einfach nur Blödsinn.', {
+                fontSize: '18px', color: '#CC00FF', fontFamily: 'Roboto', wordWrap: { width: 270 }
             })
         ];
         legendPanel.add([bg, ...chatBubbles]);
     }
 
+    private createColorNotes(){
+        // Original coordinates
+        const baseX = 990; 
+        const baseY = 635; 
+
+        const circleRadius = 13;
+        const gapX = 75; // distance of circles
+
+        const buttons = [
+            { color: 0x00cc00, label: 'Echt', key: 'real' },   // geen
+            { color: 0xe74c3c, label: 'Fake', key: 'fake' },   // red
+            { color: 0x95a5a6, label: 'Neutral', key: 'normal' } // grey
+        ];
+
+        buttons.forEach((btn, index) => {
+            const x = baseX + index * gapX;
+
+            const circle = this.add.circle(x, baseY, circleRadius, btn.color)
+                .setInteractive()
+                .setData('key', btn.key);
+
+            // notes
+            const label = this.add.text(x, baseY + 25, btn.label, {
+                fontSize: '18px',
+                color: '#000000',
+                fontFamily: 'Roboto',
+            }).setOrigin(0.5, 0)
+        });
+    }
+
     private spawnNewPost() {
         // Only spawn if fewer than maxPostsOnScreen posts are on screen
-        const activePosts = this.children.list.filter(obj =>
+        /*const activePosts = this.children.list.filter(obj =>
             obj instanceof Phaser.GameObjects.Container
-        ).length;
-        if (activePosts >= this.maxPostsOnScreen) {
+        ).length;*/
+        if (this.activeContainers > 0) {
             return;
         }
-        if (!this.posts || this.posts.length === 0 || this.currentPostIndex >= this.posts.length) {
+        if (!this.posts || this.posts.length === 0) {
             console.warn('No posts available to spawn');
             return;
         }
-        //console.log("currentPostIndex: ", this.currentPostIndex);
-        const post = this.posts[this.currentPostIndex];
-        //console.log('Selected post:', post);
+        if(this.currentPostIndex >= this.posts.length) {
+            this.time.delayedCall(3000, () => { 
+                this.gameOver = true; 
 
-        const postContainer = this.createPostElement(post);
-        // Add animation for post appearing
-        postContainer.setAlpha(0);
-        this.tweens.add({
-            targets: postContainer,
-            alpha: 1,
-            duration: 500
+                if(this.registry.get('currentLevel') == 3) this.scene.start('GameOver', { score: this.score });
+                else {
+                    const nextLevel = this.registry.get('currentLevel') + 1;
+                    this.registry.set('currentLevel', nextLevel);
+                    this.scene.start('LevelCompleteScene', { score: this.score });
+                }
+                this.scoreText.setText(`Score: ${this.score}`);
+            });
+        }
+
+        const containersToSpawn = Math.min(2, this.posts.length - this.currentPostIndex);
+        const spawnedContainers = [];
+
+        for (let i = 0; i < containersToSpawn; i++) {
+            const post = this.posts[this.currentPostIndex];
+            const postContainer = this.createPostElement(post);
+
+            // Add animation for post
+            postContainer.setAlpha(0);
+            this.tweens.add({
+                targets: postContainer,
+                alpha: 1,
+                duration: 500
+            });
+
+            // Increase active containers 
+            this.activeContainers++;
+            spawnedContainers.push(postContainer);
+
+            this.currentPostIndex++;
+        }
+
+        // Destroy event
+        spawnedContainers.forEach(container => {
+            container.once('destroy', () => {
+                this.activeContainers--;
+                
+                // Spawn new containers 
+                if (this.activeContainers === 0) {
+                    this.feedY = 275;
+                    this.time.delayedCall(200, () => {
+                        this.spawnNewPost();
+                    });
+                }
+            });
         });
-        this.currentPostIndex++;
     }
     
     private createPostElement(
@@ -530,13 +690,13 @@ export class NewsFeed extends Scene {
         // Smaller post card
 
         const cardWidth = 750;
-        const cardHeight = 150;
+        const cardHeight = 170;
 
         const container = this.add.container(420, this.feedY)
             .setSize(cardWidth, cardHeight).setInteractive();
 
 
-        this.feedY += cardHeight + 35; // Stack posts vertically with margin
+        this.feedY += cardHeight + 45; // Stack posts vertically with margin
         //this.input.setDraggable(container);
         const bg = this.add.rectangle(0, 0, cardWidth, cardHeight + 15, 0xffffff)
             .setOrigin(0.5)
@@ -570,7 +730,7 @@ export class NewsFeed extends Scene {
         const viralBar = this.add.rectangle(cardWidth / 2 - barWidth - 30, topRowY, 0, barHeight, 0xd32f2f).setOrigin(0, 0.5);
 
         // Content (centered, smaller, more margin)
-        const content = this.add.text(-cardWidth / 2 + 32, topRowY + 25, `cONTENT OF POST: ${post.content}`, {
+        const content = this.add.text(-cardWidth / 2 + 32, topRowY + 25, `Source: ${post.content}`, {
             fontSize: '20px', color: '#222', fontFamily: 'Roboto', fontStyle: 'bold', wordWrap: { width: cardWidth - 80 }, align: 'left'
         }).setOrigin(0);
 
@@ -578,8 +738,8 @@ export class NewsFeed extends Scene {
         let source: Phaser.GameObjects.Text | null = null;
         if (post.source) {
             source = this.add.text(-cardWidth / 2 + 32, topRowY + content.height + 35, post.source, {
-                fontSize: '18px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'normal'
-            }).setOrigin(0).setDepth(20);
+                fontSize: '20px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'normal'
+            }).setOrigin(0);
             // save position
             source.setData('originalX', content.x + source.x); // container
             source.setData('originalY', content.y + source.y);
@@ -598,11 +758,11 @@ export class NewsFeed extends Scene {
                 const globalX = source!.getData('originalX');
                 const globalY = source!.getData('originalY') - 20;
                 draggedClone = this.add.text(globalX, globalY, source!.text, {
-                    fontSize: '18px',
+                    fontSize: '20px',
                     color: '#1976d2',
                     fontFamily: 'Roboto',
                     fontStyle: 'normal'
-                }).setOrigin(0).setDepth(10).setAlpha(0.8).setScale(1.1);
+                }).setOrigin(0).setDepth(15).setAlpha(0.8).setScale(1.1);
 
                 //(draggedClone as any).isSourceLink = true;
 
@@ -671,145 +831,22 @@ export class NewsFeed extends Scene {
 
         // Image
         let image: Phaser.GameObjects.Image | null = null;
+        let seeImageText: Phaser.GameObjects.Text | null = null;
         console.log('aaaa: ', post.img)
         if (post.img) {
-            if (!post.source) image = this.add.image(-cardWidth / 2 + 32, topRowY + content.height + 45, `postImg${post.id}`).setOrigin(0).setDisplaySize(360, 300).setDepth(20);
-            else image = this.add.image(-cardWidth / 2 + 48, topRowY + content.height + 75, `postImg${post.id}`).setOrigin(0).setDisplaySize(360, 300).setDepth(20);
-            // save position
-            image.setData('originalX', content.x + image.x);
-            image.setData('originalY', content.y + image.y);
-
-            image.setInteractive({ draggable: true });
-            this.input.setDraggable(image);
-
-            // Drag logic
-            let igmaeDraggedClone: Phaser.GameObjects.Image | null = null;
-            image.on('dragstart', (pointer: any) => {
-                console.log('Drag started for image!');
-
-                // set position for clone
-                const globalX = image!.getData('originalX');
-                const globalY = image!.getData('originalY') - 20;
-                igmaeDraggedClone = this.add.image(globalX, globalY, `postImg${post.id}`).setOrigin(0).setDepth(10).setAlpha(0.8).setDisplaySize(360, 300);
-
-                igmaeDraggedClone.setInteractive({ draggable: true });
-                this.input.setDraggable(igmaeDraggedClone);
-
-                this.input.once('drag', (pointer: any, dragX: number, dragY: number) => {
-                    if (igmaeDraggedClone) {
-                        igmaeDraggedClone.x = dragX;
-                        igmaeDraggedClone.y = dragY;
-                    }
-                });
-
-                this.input.once('dragend', (pointer: any, dragX: number, dragY: number, dropped: boolean) => {
-                    if (igmaeDraggedClone) {
-                        igmaeDraggedClone.setDepth(15).setAlpha(1).setScale(1);
-
-                        if (!dropped) {
-                            igmaeDraggedClone.destroy();
-                        }
-                    }
-                });
-            });
-            // Drop zone logic
-            this.input.on('drop', (pointer: any, gameObject: Phaser.GameObjects.Image, dropZone: any) => {
-                if (gameObject === image && dropZone.getData('type') === 'reverse-image-search') {
-                    this.imageText?.setText('Checking ...').setColor('#1976d2');
-
-                    this.time.delayedCall(1000, () => { // 1000ms = 1 s
-                        // Pop-up background
-                        const popupBg = this.add.rectangle(cardWidth + 275, cardHeight + 240, 400, 450, 0xffffff)
-                            .setStrokeStyle(3, 0x1976d2)
-                            .setDepth(100);
-
-                        // Pop-up text
-                        let popupText: Phaser.GameObjects.Text | null = null;
-                        if (post.contentFoogleSearch) {
-                            popupText = this.add.text(cardWidth + 110, cardHeight + 50, post.contentFoogleSearch, {
-                                fontSize: '20px',
-                                color: '#000',
-                                fontFamily: 'Roboto',
-                                align: 'left',
-                                wordWrap: { width: 350, useAdvancedWrap: true }
-                            }).setOrigin(0).setDepth(101);
-                        } else {
-                            popupText = this.add.text(cardWidth + 110, cardHeight + 30, 'Keine Informationen darüber', {
-                                fontSize: '20px',
-                                color: '#000',
-                                fontFamily: 'Roboto',
-                                align: 'left'
-                            }).setOrigin(0).setDepth(101);
-                        }
-
-                        // Pop-up image
-                        //console.log("post object:", post);
-                        //console.log("imgWithFoogle:", post.imgWithFoogle);
-                        let popupImage: Phaser.GameObjects.Image | null = null;
-                        console.log("img in pop up ", post.imgWithFoogle);
-                        if (post.imgWithFoogle) {
-                            popupImage = this.add.image(cardWidth, cardHeight, `foogleImg${post.id}`)
-                                .setDisplaySize(275, 275)
-                                .setDepth(101);
-                            console.log("popup image: ", popupImage);
-                            console.log("popup image: x = ", popupImage.x);
-                        }
-
-                        // Exit button
-                        const exitButton = this.add.image(cardWidth + 470, cardHeight + 20, 'exitButton')
-                            .setDisplaySize(50, 50).setOrigin(0.5).setDepth(101)
-                            .setInteractive();
-
-                        exitButton.on('pointerdown', () => {
-                            //console.log('Button exists before destroy:', exitButton.active);
-                            popupBg.destroy();
-                            if (popupText) popupText.destroy();
-                            if (popupImage) popupImage.destroy();
-                            exitButton.destroy();
-                            console.log('Button destroyed');
-                            this.time.delayedCall(1000, () => {
-                                if (this.imageText && this.imageText.active) {
-                                    this.imageText.setText('Ziehe das Bild hierher ...').setColor('#888888');
-                                    console.log('Text updated successfully');
-                                } else {
-                                    console.error('imageText is null, undefined, or destroyed');
-                                }
-                            });
-                        });
-                    });
-                }
+            if (!post.source) seeImageText = this.add.text(-cardWidth / 2 + 105, topRowY + content.height + 50, '👉 Bild ansehen', {
+                fontSize: '20px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'italic'})
+                .setOrigin(0.5).setInteractive().setDepth(16); //'#1976d2'
+            else {
+                seeImageText = this.add.text(-cardWidth / 2 + 105, topRowY + content.height + 75, '👉 Bild ansehen', {
+                fontSize: '20px', color: '#1976d2', fontFamily: 'Roboto', fontStyle: 'italic'})
+                .setOrigin(0.5).setInteractive().setDepth(16);
+            }
+            console.log("seeImageText: ", seeImageText);
+            seeImageText.on('pointerdown', () => {
+                this.showImagePopup(post);
             });
         }
-
-        /*const minTopForContainer = 165;
-
-        let containerCurrentHeight = avatar.height + content.height;
-        if (source) containerCurrentHeight += source.height;
-        if (image) {
-            console.log("image: ", image);
-            containerCurrentHeight += 300;}
-
-        console.log("final height: ", containerCurrentHeight);
-
-        // Tính toán vị trí Y cho container để đảm bảo top không đè lên buttons
-        const containerTop = this.feedY - containerCurrentHeight / 2; // Top hiện tại của container
-        const requiredFeedY = minTopForContainer + containerCurrentHeight / 2; // FeedY cần thiết
-
-        // Điều chỉnh feedY nếu cần
-        if (containerTop < minTopForContainer) {
-            this.feedY = requiredFeedY;
-        }
-        const container = this.add.container(420, this.feedY)
-            .setSize(cardWidth, containerCurrentHeight).setInteractive();
-
-
-        this.feedY += minTopForContainer + containerCurrentHeight + 25; // Stack posts vertically with margin
-        //this.input.setDraggable(container);
-        const bg = this.add.rectangle(0, 0, cardWidth, containerCurrentHeight + 15, 0xffffff)
-            .setOrigin(0.5)
-            .setStrokeStyle(4, 0x1976d2)
-            .setAlpha(0.99);
-        */
 
         // Add button for fake, real new
         const centerX = cardWidth / 2 + 30;
@@ -831,7 +868,7 @@ export class NewsFeed extends Scene {
             button.on('pointerdown', () => {
                 selectionCircle = this.add.circle(button.x, button.y, 14)
                     .setStrokeStyle(2, 0x00cccc)
-                    .setDepth(2);
+                    .setDepth(15);
                 container.add(selectionCircle);
                 if (color === 0x00cc00) {
                     if (post.category === 'real') {
@@ -869,39 +906,19 @@ export class NewsFeed extends Scene {
         // Add all elements to the container
         container.add([bg, avatar, usernameText, timeText, content, viralLabel, viralBarBg, viralBar]);
         if (source != null) container.add(source);
-        if (image != null) container.add(image);
+        if (seeImageText != null) {
+            container.add(seeImageText);
+        }
         (container as any).isNewsPost = true;
         (container as any).viralBar = viralBar;
         (container as any).viralText = viralLabel;
-        container.setDepth(10);
         return container;
     }
-
-    /*private useTool(tool: string) {
-        if (!this.selectedPost || !this.selectedPostContainer) {
-            this.showFeedback('Select a post first!', '#d32f2f');
-            return;
-        }
-        let feedback = '';
-        let color = '#1976d2';
-        if (tool === 'check-image') {
-            feedback = 'Image search opened!';
-            color = '#1976d2';
-            // Example: window.open('https://images.google.com/', '_blank');
-        } else if (tool === 'check-source') {
-            // Open a new tab with a Google search for the source and title
-            const url = `https://www.google.com/search?q=${encodeURIComponent(this.selectedPost.source + ' ' + this.selectedPost.content)}`;
-            window.open(url, '_blank');
-            feedback = 'Source opened in new tab!';
-            color = '#1976d2';
-        }
-        this.showFeedback(feedback, color);
-    }*/
     
     private showFeedback(message: string, color: string) {
         this.feedbackText.setText(message);
         this.feedbackText.setColor(color);
-        this.feedbackText.setAlpha(1);
+        this.feedbackText.setAlpha(1).setDepth(110);
         this.tweens.add({
             targets: this.feedbackText,
             alpha: 0,
@@ -927,7 +944,7 @@ export class NewsFeed extends Scene {
         let gameOver = false;
         this.children.list.forEach(obj => {
             if (obj instanceof Phaser.GameObjects.Container && (obj as any).isNewsPost === true) {
-                const post = this.posts[0];
+                const post = this.posts[this.currentPostIndex];
                 if (post) {
                     post.viralScore = Math.min(100, post.viralScore + viralIncrement);
                     // Update viral bar and text
@@ -938,6 +955,7 @@ export class NewsFeed extends Scene {
                         viralText.setText(`Viral: ${Math.round(post.viralScore)}%`);
                     }
                     // If fake news and viralScore hits 100, game over
+                    console.log("current post index = ",this.currentPostIndex);
                     if (post.category === "fake" && post.viralScore >= 100) {
                         this.time.delayedCall(3000, () => { gameOver = true; });
                     }
@@ -945,7 +963,8 @@ export class NewsFeed extends Scene {
             }
         });
         if (gameOver) {
-            this.scene.start('GameOver', { score: this.score });
+            if(this.registry.get('currentLevel') == 3) this.scene.start('GameOver', { score: this.score });
+            else this.scene.start('LevelCompleteScene', { score: this.score });
         }
         this.scoreText.setText(`Score: ${this.score}`);
     }
