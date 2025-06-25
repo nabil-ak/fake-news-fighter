@@ -9,7 +9,7 @@ export type LevelData = {
 const levels: LevelData[] = [
     {
         "levelID": 1,
-        "requirements": "- Verwende den Link-Checker, um den Link im Beitrag zu überprüfen.\n- Ist er grün? Nicht sofort vertrauen - klicke drauf und überprüfe die Seite.\n- Markiere den Beitrag als fake, echt oder irrelevant.\n*Achtung:\nEin Klick auf einen gefährlichen Link = Game Over!\nFalsche Einordnung = Punktabzug!",
+        "requirements": "- Verwende den Link-Checker, um den Link im Beitrag zu überprüfen.\n- Markiere den Beitrag als fake, echt oder irrelevant.\n\n*Achtung:\nEin Klick auf einen gefährlichen Link = Game Over!\nFalsche Einordnung = Punktabzug!",
         "postSetId": "set1"
     },
     {
@@ -19,7 +19,7 @@ const levels: LevelData[] = [
     },
     {
         "levelID": 3,
-        "requirements": "Willkommen in der Meisterstufe!\nWas tun, wenn es um ein Bild geht?\n-> Zieh das Bild mit Drag & Drop ins neue Tool: Reverse Image Search.\nEs zeigt dir z.B.\n- dieselbes Bild auf einer seriösen Seite,\n- ein ähnliches Bild, das ein bisschen anders aussieht? (-> vielleicht bearbeitet?),\n- oder gar kein Ergebnis (-> womöglich generiert oder manipuliert).\n- Kombiniere jetzt alle Tools! Nur wer genau prüft, erkennt die Wahrheit hinter den Posts.",
+        "requirements": "Willkommen in der Meisterstufe!\nWas tun, wenn es um ein Bild geht? => Zieh das Bild mit Drag & Drop ins neue Tool: Reverse Image Search.\nEs zeigt dir z.B.\n- dieselbes Bild auf einer seriösen Seite,\n- ein ähnliches Bild, das ein bisschen anders aussieht? (-> vielleicht bearbeitet?),\n- oder gar kein Ergebnis. \n* Kombiniere jetzt alle Tools!",
         "postSetId": "set3"
     }
 ];
@@ -57,7 +57,7 @@ export class LevelRequirement extends Scene {
 
         // Add instructions
         this.add.text(475, 100,
-            `Level ${currentLevel}:\n${currentLevelData.requirements}`, {
+            `LEVEL ${currentLevel}:\n${currentLevelData.requirements}`, {
             fontFamily: 'Roboto',
             fontSize: '24px',
             color: '#444',

@@ -776,7 +776,7 @@ export class NewsFeed extends Scene {
         const viralBar = this.add.rectangle(cardWidth / 2 - barWidth - 30, topRowY, 0, barHeight, 0xd32f2f).setOrigin(0, 0.5);
 
         // Content (centered, smaller, more margin)
-        const content = this.add.text(-cardWidth / 2 + 32, topRowY + 25, `Source: ${post.content}`, {
+        const content = this.add.text(-cardWidth / 2 + 32, topRowY + 25, post.content, {
             fontSize: '20px', color: '#222', fontFamily: 'Roboto', fontStyle: 'bold', wordWrap: { width: cardWidth - 80 }, align: 'left'
         }).setOrigin(0);
 

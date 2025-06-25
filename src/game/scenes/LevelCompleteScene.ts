@@ -42,18 +42,15 @@ export class LevelCompleteScene extends Scene {
 
     // Show score and time
     const score = data.score ?? 0;
-    const time = data.time ?? 0;
-    this.add.text(640, 340, `Score: ${score}`,
-      { fontSize: '32px', color: '#222', fontFamily: 'Roboto' })
-      .setOrigin(0.5);
-    this.add.text(640, 380, `Time: ${time} s`,
-      { fontSize: '32px', color: '#222', fontFamily: 'Roboto' })
+    this.add.text(640, 360, `Score: ${score}`,
+      { fontSize: '35px', color: '#222', fontFamily: 'Roboto' })
       .setOrigin(0.5);
 
     // Button positions
     const buttonY = 520;
     const buttonSpacing = 140;
     const currentLevel = this.registry.get('currentLevel') || 1;
+    const currentFinalScore = this.registry.get('finalScore') || 0;
     const maxLevel = 3;
 
     // Home button
@@ -73,6 +70,8 @@ export class LevelCompleteScene extends Scene {
       .setInteractive({ useHandCursor: true });
     repeatButton.on('pointerdown', () => {
       // Restart current level
+      this.registry.set('currentLevel', currentLevel - 1);
+      this.registry.set('finalScore', currentFinalScore - score);
       this.scene.start('LevelRequirement');
     })
     .on('pointerover', () => { repeatButton.setScale(0.45); })
